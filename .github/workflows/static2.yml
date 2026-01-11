@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Newsroom Dashboard</title>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init({
+              publicKey: "RbeVUo-zoi6r99uGH",
+            });
+        })();
+    </script>
+
+    <style>
+        :root {
+            --beige-bg: #f5f5dc;
+            --paper: #fdfdf8;
+            --accent: #d2b48c;
+            --amber: #ffbf00;
+            --text: #4a4a4a;
+            --tab-inactive: #e9e9d0;
+            --work-green: #c8e6c9;
+            --work-text: #2e7d32;
+            --off-red: #ffcccb;
+            --off-text: #b71c1c;
+            --post-it: #fff9c4;
+            --sky-blue: #add8e6;
+            --border-muted: rgba(0,0,0,0.08);
+            --transition: all 0.2s ease-in-out;
+            --icon-btn-color: #4a4a4a;
+        }
+
+        body.dark-mode {
+            --beige-bg: #121212;
+            --paper: #1e1e1e;
+            --text: #e0e0e0;
+            --tab-inactive: #2d2d2d;
+            --post-it: #444433;
+            --accent: #a68b6a;
+            --border-muted: rgba(255,255,255,0.1);
+            --icon-btn-color: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; }
+        body { background-color: var(--beige-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
+        
+        /* --- HEADER --- */
+        header { padding: 15px 40px; display: flex; align-items: center; gap: 30px; height: 90px; }
+        .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
+        
+        /* Digital Clock */
+        #clock-digital { font-size: 2.8rem; font-weight: 200; color: #222; letter-spacing: -1px; white-space: nowrap; transition: color 0.4s ease; display: block; }
+        body.dark-mode #clock-digital { color: #fff; }
+
+        /* Analog Clock */
+        #clock-analog { width: 50px; height: 50px; display: none; }
+        .clock-face { fill: none; stroke: var(--text); stroke-width: 2.5; }
+        .clock-hand { stroke: var(--text); stroke-linecap: round; }
+        .hand-hour { stroke-width: 3.5; }
+        .hand-min { stroke-width: 2.5; }
+        .hand-sec { stroke-width: 1.5; stroke: var(--accent); }
+        .clock-center { fill: var(--text); }
+
+        /* Clock Flash Animation */
+        @keyframes flash-twice {
+            0%, 100% { opacity: 1; }
+            25% { opacity: 0.1; }
+            50% { opacity: 1; }
+            75% { opacity: 0.1; }
+        }
+        .clock-flash { animation: flash-twice 1s ease-in-out; }
+
+        /* --- TICKER --- */
+        .ticker-wrap { flex-grow: 1; overflow: hidden; background: rgba(255, 255, 255, 0.3); border-radius: 50px; padding: 10px 0; white-space: nowrap; display: flex; align-items: center; }
+        .ticker { display: inline-block; animation: ticker 180s linear infinite; padding-left: 100%; }
+        .ticker:hover { animation-play-state: paused; }
+        .ticker-item { display: inline-block; padding: 0 30px; font-size: 0.95rem; color: #555; text-decoration: none; border-right: 1px solid var(--border-muted); vertical-align: middle; }
+        body.dark-mode .ticker-item { color: #aaa; }
+
+        .category-tag { font-weight: 900; color: #222; margin-right: 10px; padding: 4px 12px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 0.8rem; vertical-align: middle; }
+        .tag-news { background-color: #ffcccb; }
+        .tag-sport { background-color: #fff9c4; }
+        .tag-sky { background-color: #add8e6; }
+        .live-dot { height: 8px; width: 8px; background-color: #ff0000; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        /* --- LEFT DRAWER (FEEDS) --- */
+        #side-drawer { position: fixed; left: -1000px; top: 0; width: 1000px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; }
+        #side-drawer.open { left: 0; }
+        #drawer-tab { position: fixed; left: 0; top: 50%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: transform 0.3s; }
+        
+        #side-feed-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-grow: 1; overflow: hidden; }
+        .col-title { font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; font-weight: 800; border-bottom: 2px solid var(--border-muted); padding-bottom: 6px; letter-spacing: 1px; }
+        .feed-column { overflow-y: auto; padding-right: 8px; }
+        .side-feed-item { margin-bottom: 12px; border-bottom: 1px solid var(--border-muted); padding-bottom: 12px; }
+        .side-feed-item:last-child { border-bottom: none; }
+        .side-feed-item a { text-decoration: none; color: var(--text); font-size: 0.85rem; font-weight: 600; display: block; line-height: 1.4; transition: color 0.2s; }
+        .side-feed-item a:hover { color: var(--accent); }
+        .side-feed-date { font-size: 0.7rem; opacity: 0.5; margin-top: 5px; font-weight: 400; }
+
+        /* --- RIGHT DRAWER 1 (SCRATCHPAD & CALCULATOR) --- */
+        #right-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        #right-drawer.open { right: 0; }
+        #right-drawer-tab { position: fixed; right: 0; top: 42%; transform: translateY(-50%); background: #7f8c8d; color: white; padding: 15px 6px; border-radius: 8px 0 0 8px; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: right 0.3s; }
+
+        /* --- RIGHT DRAWER 2 (UPCOMING OUTLOOK) --- */
+        #outlook-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        #outlook-drawer.open { right: 0; }
+        #outlook-tab { position: fixed; right: 0; top: 58%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 8px 0 0 8px; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: right 0.3s; }
+
+        /* Outlook Content Styles */
+        .outlook-day-group { margin-bottom: 20px; }
+        .outlook-date-header { font-size: 0.75rem; font-weight: 800; color: var(--accent); border-bottom: 2px solid var(--border-muted); margin-bottom: 8px; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .outlook-item { font-size: 0.8rem; margin-bottom: 6px; padding: 6px; background: rgba(0,0,0,0.03); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        body.dark-mode .outlook-item { background: rgba(255,255,255,0.05); }
+        .outlook-info { flex-grow: 1; display: flex; align-items: flex-start; }
+        .outlook-time { font-weight: bold; margin-right: 8px; color: var(--text); opacity: 0.8; font-size: 0.75rem; min-width: 40px; }
+        .outlook-details { line-height: 1.3; }
+        .outlook-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--icon-btn-color); opacity: 0; margin-left: 5px; padding: 2px; transition: opacity 0.2s, transform 0.2s; }
+        .outlook-item:hover .outlook-btn { opacity: 0.6; } 
+        .outlook-btn:hover { opacity: 1 !important; transform: scale(1.1); }
+        .outlook-del { color: #ff4444; }
+
+        /* --- SCRATCHPAD --- */
+        #quick-scraps { width: 100%; flex-grow: 1; padding: 15px; border: none; background: transparent; font-size: 0.95rem; resize: none; color: var(--text); font-family: inherit; outline: none; line-height: 1.6; border-bottom: 1px solid var(--border-muted); margin-bottom: 20px; }
+
+        /* --- MATH WIDGET --- */
+        .math-widget { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 8px; margin-top: auto; border: 1px solid var(--border-muted); }
+        body.dark-mode .math-widget { background: rgba(255,255,255,0.05); }
+        .math-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .math-input { width: 50%; padding: 8px; border: 1px solid var(--border-muted); border-radius: 4px; font-size: 0.75rem; background: var(--paper); color: var(--text); }
+        .math-result { font-size: 0.8rem; font-weight: bold; padding-top: 8px; border-top: 1px dashed var(--border-muted); display: flex; justify-content: space-between; align-items: center; }
+        .result-val { font-size: 0.9rem; }
+        .diff-val { font-size: 0.7rem; opacity: 0.7; }
+        .pos { color: var(--work-text); }
+        .neg { color: #d32f2f; }
+
+        /* --- LAYOUT --- */
+        main { display: grid; grid-template-columns: 1fr 360px; gap: 20px; padding: 0 40px 30px 40px; flex-grow: 1; height: calc(100% - 90px); overflow: hidden; transition: all 0.5s ease; }
+        .card { background: var(--paper); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: all 0.5s ease; }
+        
+        /* --- SIDEBAR ZONES --- */
+        .sidebar-container { display: flex; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; padding-right: 5px; }
+        .sidebar-section { border-bottom: 1px solid var(--border-muted); padding-bottom: 15px; }
+        .sidebar-section:last-child { border-bottom: none; }
+        .section-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .section-label:hover { color: var(--text); }
+
+        /* --- SIDEBAR HEADER ROW --- */
+        .sidebar-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .header-tools-group { display: flex; gap: 10px; align-items: center; }
+        .header-tool-btn { background: transparent; border: none; cursor: pointer; color: var(--text); opacity: 0.4; padding: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .header-tool-btn:hover { opacity: 1; color: var(--accent); transform: scale(1.1); }
+        .header-tool-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        
+        /* Recording Animation */
+        .recording-active { color: #ff4444 !important; opacity: 1 !important; animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        /* Audio Modal */
+        #audioModal { display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .audio-modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 320px; text-align: center; }
+        .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+
+        .icon-sun { display: none; }
+        .icon-moon { display: block; }
+        body.dark-mode .icon-sun { display: block; }
+        body.dark-mode .icon-moon { display: none; }
+
+        /* --- SEARCH & ARCHIVE --- */
+        .search-item, .filed-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
+        .search-item:hover, .filed-item:hover { background: rgba(0,0,0,0.03); }
+        body.dark-mode .search-item:hover, body.dark-mode .filed-item:hover { background: rgba(255,255,255,0.05); }
+        .filed-item { justify-content: space-between; }
+        
+        .type-tag { font-size: 0.55rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; font-weight: 800; color: #fff; flex-shrink: 0; min-width: 55px; text-align: center; letter-spacing: 0.5px; }
+        .tag-note { background: var(--accent); }
+        .tag-archive { background: #7f8c8d; }
+        .tag-event { background: var(--work-text); }
+        .tag-task { background: #e67e22; }
+        .search-title { flex-grow: 1; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .search-meta { font-size: 0.65rem; opacity: 0.5; margin-left: auto; white-space: nowrap; }
+
+        /* --- TRACKER --- */
+        .day-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; flex-direction: column; cursor: pointer; border: 1px solid transparent; }
+        .on-shift { background: var(--work-green); color: var(--work-text); }
+        .off-shift { background: var(--off-red); color: var(--off-text); }
+        .is-today { font-weight: 900; text-decoration: underline; border-color: var(--text); }
+        .selected-day { outline: 2px solid var(--amber); outline-offset: 2px; }
+        #agenda-list { max-height: 160px; overflow-y: auto; padding-right: 4px; margin-top: 10px; }
+        
+        .event-item { background: rgba(0,0,0,0.02); padding: 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--accent); position: relative; transition: background-color 0.2s; }
+        body.dark-mode .event-item { background: rgba(255,255,255,0.05); }
+        .event-tools { position: absolute; right: 5px; top: 5px; opacity: 0; transition: 0.2s; background: var(--paper); padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; }
+        .event-item:hover .event-tools { opacity: 1; }
+        .event-tools button { border: none; background: none; cursor: pointer; font-size: 0.75rem; color: var(--icon-btn-color); margin-left: 5px; }
+        .event-tools button.delete-btn { color: #ff4444; }
+
+        /* Event Status Colors */
+        .event-item.status-amber { background-color: #fff8e1 !important; border-left-color: #ffb300 !important; }
+        body.dark-mode .event-item.status-amber { background-color: rgba(255, 179, 0, 0.15) !important; color: #ffe082; }
+        
+        .event-item.status-green { background-color: var(--work-green) !important; border-left-color: var(--work-text) !important; color: var(--work-text) !important; }
+        body.dark-mode .event-item.status-green { background-color: rgba(46, 125, 50, 0.25) !important; color: #81c784 !important; }
+        
+        .event-item.status-active { background-color: var(--work-green) !important; border-left-color: var(--work-text) !important; color: var(--work-text) !important; }
+        body.dark-mode .event-item.status-active { background-color: rgba(46, 125, 50, 0.35) !important; color: #81c784 !important; }
+        
+        .event-item.status-past { background-color: rgba(0,0,0,0.02) !important; opacity: 0.5; border-left-color: #ccc !important; }
+        body.dark-mode .event-item.status-past { background-color: rgba(255,255,255,0.02) !important; border-left-color: #444 !important; }
+
+        /* Static Active Dot */
+        .active-dot { height: 8px; width: 8px; background-color: var(--work-text); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; }
+
+        /* --- TASKS --- */
+        #sort-list { max-height: 150px; overflow-y: auto; padding-right: 4px; }
+        .sort-item { background: var(--post-it); padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .sort-item.completed { animation: satisfy-complete 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
+        @keyframes satisfy-complete {
+            0% { background-color: var(--post-it); opacity: 1; transform: scale(1); }
+            30% { background-color: #4CAF50; color: white; transform: scale(1.05); opacity: 1; }
+            100% { background-color: #4CAF50; color: white; transform: scale(0.8); opacity: 0; max-height: 0; margin: 0; padding: 0; }
+        }
+
+        /* --- EDITOR --- */
+        .tabs-wrapper { display: flex; align-items: center; gap: 5px; border-bottom: 1px solid var(--border-muted); overflow-x: auto; min-height: 40px; }
+        .tab { background: var(--tab-inactive); padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
+        .tab.active { background: var(--paper); font-weight: 600; }
+        #catchline-input { border: none; outline: none; background: transparent; font-size: 1.4rem; font-weight: 700; border-bottom: 1px solid var(--border-muted); margin-bottom: 15px; width: 100%; color: var(--text); padding: 5px 0; transition: font-size 0.3s, text-align 0.3s; }
+        #story-editor { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-size: 1.2rem; line-height: 1.7; resize: none; color: var(--text); font-family: inherit; transition: font-size 0.3s; }
+        .editor-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-muted); }
+        
+        .file-btn, .email-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
+        .file-btn { background: var(--accent); color: white; }
+        .email-btn { background: #4a4a4a; color: white; }
+        .delete-story-btn { background: transparent; color: var(--off-text); border: 1px solid var(--off-text); }
+        .delete-story-btn:hover { background: var(--off-red); }
+        .zen-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        .zen-btn:hover { background: var(--accent); color: white; }
+
+        /* ANIMATED TICK */
+        .success-tick { width: 18px; height: 18px; margin-left: 8px; vertical-align: middle; }
+        .success-tick path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: draw-tick 0.5s ease-out forwards; }
+        @keyframes draw-tick { to { stroke-dashoffset: 0; } }
+
+        /* ZEN MODE */
+        body.zen-mode header { display: none; }
+        body.zen-mode #drawer-tab, body.zen-mode #right-drawer-tab, body.zen-mode #outlook-tab { transform: translateY(-50%) scaleX(0); }
+        body.zen-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
+        body.zen-mode .card:last-child { display: none; }
+        body.zen-mode .card:first-child { box-shadow: none; background: transparent; border: none; padding: 40px 0; }
+        body.zen-mode #story-editor { font-size: 1.4rem; line-height: 1.8; }
+        body.zen-mode #catchline-input { font-size: 2.2rem; text-align: center; border-bottom: none; margin-bottom: 30px; }
+        body.zen-mode .editor-footer { border-top: none; opacity: 0.3; transition: opacity 0.3s; }
+        body.zen-mode .editor-footer:hover { opacity: 1; }
+        #exit-zen-btn { position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.1); border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text); z-index: 2000; display: none; }
+        body.zen-mode #exit-zen-btn { display: block; }
+
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 350px; }
+        .modal-content input, .modal-content textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<button id="exit-zen-btn" onclick="toggleZenMode()">Exit Zen Mode (Esc)</button>
+
+<div id="side-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">WIRE FEEDS</span>
+        <button onclick="toggleDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
+    </div>
+    <input type="text" id="drawer-search" placeholder="Search wires..." oninput="filterDrawer()" style="width:100%; padding:10px; margin-bottom:25px; border:1px solid #ddd; border-radius:6px; background:transparent; color:var(--text);">
+    <div id="side-feed-columns">
+        <div class="feed-column">
+            <div class="col-title">Tenders</div>
+            <div id="col-2-content">...</div>
+        </div>
+        <div class="feed-column" style="border-left: 1px solid var(--border-muted); padding-left: 20px;">
+            <div class="col-title">Science / Offbeat</div>
+            <div id="col-3-content">...</div>
+        </div>
+    </div>
+</div>
+<div id="drawer-tab" onclick="toggleDrawer()">EXTERNAL FEEDS</div>
+
+<div id="right-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">SCRATCHPAD</span>
+        <button onclick="toggleRightDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
+    </div>
+    <textarea id="quick-scraps" placeholder="Jot down quotes, numbers, ideas..."></textarea>
+    
+    <div class="section-label">% CHANGE CALCULATOR</div>
+    <div class="math-widget">
+        <div class="math-row">
+            <input type="number" id="calc-old" class="math-input" placeholder="Old Num" oninput="calculateMath()">
+            <input type="number" id="calc-new" class="math-input" placeholder="New Num" oninput="calculateMath()">
+        </div>
+        <div id="math-result" class="math-result">
+            <span style="opacity:0.5;">Result</span>
+            <span>--</span>
+        </div>
+    </div>
+</div>
+<div id="right-drawer-tab" onclick="toggleRightDrawer()">SCRATCHPAD</div>
+
+<div id="outlook-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">UPCOMING WEEK</span>
+        <button onclick="toggleOutlookDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
+    </div>
+    <div id="outlook-content"></div>
+</div>
+<div id="outlook-tab" onclick="toggleOutlookDrawer()">UPCOMING</div>
+
+<header>
+    <div class="clock-wrapper" onclick="toggleClockMode()">
+        <span id="clock-digital">00:00:00</span>
+        <svg id="clock-analog" class="clock-face" viewBox="0 0 100 100">
+            <circle class="clock-face" cx="50" cy="50" r="48" />
+            <circle class="clock-center" cx="50" cy="50" r="2" />
+            <line id="hour-hand" class="clock-hand hand-hour" x1="50" y1="50" x2="50" y2="30" />
+            <line id="min-hand" class="clock-hand hand-min" x1="50" y1="50" x2="50" y2="15" />
+            <line id="sec-hand" class="clock-hand hand-sec" x1="50" y1="50" x2="50" y2="10" />
+        </svg>
+    </div>
+    <div class="ticker-wrap"><div class="ticker" id="ticker-feed">Loading...</div></div>
+</header>
+
+<main>
+    <section class="card">
+        <div class="tabs-wrapper" id="tab-bar"></div>
+        <div style="display:flex; flex-direction:column; height:100%; padding-top:15px;">
+            <input type="text" id="catchline-input" placeholder="Catchline...">
+            <textarea id="story-editor" placeholder="Start typing..."></textarea>
+            <div class="editor-footer">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="zen-btn" onclick="toggleZenMode()">Zen Mode</button>
+                    <div id="word-count" style="font-size:0.7rem; font-weight:bold; color:#888;">WORDS: 0</div>
+                </div>
+                <div class="footer-buttons">
+                    <button class="delete-story-btn" onclick="deleteActiveNote()">Delete</button>
+                    <button class="email-btn" id="email-btn" onclick="fileAndEmail()">File & Email</button>
+                    <button class="file-btn" onclick="fileNote()">File Story</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="sidebar-container">
+            
+            <div class="sidebar-section">
+                <div class="sidebar-header-row">
+                    <div id="date-display" style="font-weight:900; font-size:1.1rem;">Date</div>
+                    <div class="header-tools-group">
+                        <button class="header-tool-btn" onclick="exportWorkspace()" title="Download Backup">
+                            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        </button>
+                        <button class="header-tool-btn" onclick="triggerImport()" title="Import Backup">
+                            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+                        </button>
+                        <button class="header-tool-btn" id="mic-btn" onclick="toggleRecording()" title="Quick Quote">
+                            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                        </button>
+                        <button class="header-tool-btn" onclick="toggleDarkMode()" title="Toggle Theme">
+                            <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="greeting" style="font-size:0.75rem; opacity:0.6; margin:0 0 12px 0;">Welcome</div>
+                
+                <div class="section-label">TRACKER <button onclick="openEventModal()" style="color:var(--accent); background:none; border:none; cursor:pointer;">+</button></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <button onclick="changeWeek(-1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❮</button>
+                    <div id="month-display" style="font-size:0.7rem; font-weight:800;">Month</div>
+                    <button onclick="changeWeek(1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❯</button>
+                </div>
+                <div id="week-calendar" style="display:flex; justify-content:space-between; margin-bottom:10px;"></div>
+                <div id="agenda-list"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-label">TO DO LIST</div>
+                <input type="text" id="sort-input" placeholder="Type task & press Enter" onkeydown="if(event.key==='Enter') addSortItem()" style="width:100%; padding:10px; border-radius:6px; border:1px solid var(--border-muted); font-size:0.8rem; background:transparent; color:var(--text);">
+                <div id="sort-list"></div>
+            </div>
+
+            <div class="sidebar-section" style="border:none;">
+                <div class="section-label">GLOBAL SEARCH</div>
+                <input type="text" id="global-search-input" placeholder="Find anything..." oninput="runGlobalSearch()" style="width:100%; padding:8px 12px; border-radius:20px; border:1px solid var(--border-muted); font-size:0.75rem; background:transparent; color:var(--text); margin-bottom:5px;">
+                <div id="search-results" style="max-height:150px; overflow-y:auto;"></div>
+                
+                <div class="sidebar-section" style="border:none; margin-top:20px;">
+                    <div class="section-label" onclick="toggleFiled()" style="display:flex; justify-content:space-between;">
+                        <span>ARCHIVED STORIES <span id="filed-count" style="opacity:0.7;">(0)</span></span>
+                        <span style="font-size:0.6rem;">▼</span>
+                    </div>
+                    <div id="filed-list" style="display:none; margin-top:5px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <input type="file" id="import-input" style="display:none;" accept=".json" onchange="importWorkspace(event)">
+    </section>
+</main>
+
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-heading" style="margin-top:0; font-size:0.9rem">Event Management</h3>
+        <input type="date" id="event-date">
+        <input type="time" id="event-time">
+        <input type="text" id="event-location" placeholder="Location">
+        <textarea id="event-details" placeholder="Details..."></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button onclick="closeEventModal()" style="background:none; border:none; color:var(--text); cursor:pointer;">Cancel</button>
+            <button onclick="saveEvent()" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="audioModal" class="modal">
+    <div class="audio-modal-content">
+        <h3 style="margin-top:0; font-size:0.9rem">Recording Finished</h3>
+        <audio id="audio-playback" controls style="width:100%; margin-top:10px;"></audio>
+        <div class="audio-controls">
+            <a id="download-link" style="display:none;"></a>
+            <button onclick="downloadAudio()" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; font-weight:bold;">Download</button>
+            <button onclick="document.getElementById('audioModal').style.display='none'" style="background:none; border:1px solid var(--border-muted); color:var(--text); padding:8px 15px; border-radius:6px; cursor:pointer;">Close</button>
+        </div>
+    </div>
+</div>
+
+<form id="email-bridge-form" style="display:none;">
+    <input type="hidden" name="title" id="hidden-title">
+    <textarea name="message" id="hidden-message"></textarea>
+    <input type="hidden" name="time" id="hidden-time">
+</form>
+
+<script>
+    let findTenderData = [], scienceDailyData = [];
+    let events = JSON.parse(localStorage.getItem('newsroom-events-final')) || [];
+    let sortItems = JSON.parse(localStorage.getItem('newsroom-sort-final')) || [];
+    let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false}];
+    let activeId = notes.find(n => !n.filed)?.id || notes[0].id;
+    let editingEventId = null;
+    let clockMode = 'digital'; 
+    let animationFrameId = null;
+    let mediaRecorder;
+    let audioChunks = [];
+
+    const todayObj = new Date();
+    let currentWeekStart = new Date();
+    const offset = todayObj.getDay() === 0 ? 6 : todayObj.getDay() - 1;
+    currentWeekStart.setDate(todayObj.getDate() - offset); currentWeekStart.setHours(0,0,0,0);
+    let selectedDate = new Date(); selectedDate.setHours(0,0,0,0);
+
+    // MATH WIDGET LOGIC
+    function calculateMath() {
+        const oldVal = parseFloat(document.getElementById('calc-old').value);
+        const newVal = parseFloat(document.getElementById('calc-new').value);
+        const resDiv = document.getElementById('math-result');
+        if (!isNaN(oldVal) && !isNaN(newVal) && oldVal !== 0) {
+            const diff = newVal - oldVal;
+            const percent = (diff / Math.abs(oldVal)) * 100;
+            const sign = diff > 0 ? '+' : '';
+            const colorClass = diff >= 0 ? 'pos' : 'neg';
+            resDiv.innerHTML = `<span class="diff-val ${colorClass}">Diff: ${sign}${diff}</span><span class="result-val ${colorClass}">${sign}${percent.toFixed(1)}%</span>`;
+        } else { resDiv.innerHTML = '<span style="opacity:0.5;">Result</span><span>--</span>'; }
+    }
+
+    // CLOCK TOGGLE
+    function toggleClockMode() {
+        clockMode = clockMode === 'digital' ? 'analog' : 'digital';
+        if (clockMode === 'analog') {
+            document.getElementById('clock-digital').style.display = 'none';
+            document.getElementById('clock-analog').style.display = 'block';
+            animateClock();
+        } else {
+            document.getElementById('clock-digital').style.display = 'block';
+            document.getElementById('clock-analog').style.display = 'none';
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        }
+        updateTime(); 
+    }
+
+    function animateClock() {
+        if (clockMode !== 'analog') return;
+        const now = new Date();
+        const sec = now.getSeconds();
+        const ms = now.getMilliseconds();
+        const min = now.getMinutes();
+        const hr = now.getHours();
+        
+        // Smooth rotation calculations
+        const secDeg = (sec + ms / 1000) * 6;
+        const minDeg = (min + sec / 60) * 6;
+        const hrDeg = (hr % 12 + min / 60) * 30;
+
+        document.getElementById('sec-hand').setAttribute('transform', `rotate(${secDeg}, 50, 50)`);
+        document.getElementById('min-hand').setAttribute('transform', `rotate(${minDeg}, 50, 50)`);
+        document.getElementById('hour-hand').setAttribute('transform', `rotate(${hrDeg}, 50, 50)`);
+
+        animationFrameId = requestAnimationFrame(animateClock);
+    }
+
+    // AUDIO RECORDER
+    async function toggleRecording() {
+        const btn = document.getElementById('mic-btn');
+        
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            btn.classList.remove('recording-active');
+        } else {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = document.getElementById('audio-playback');
+                    const downloadLink = document.getElementById('download-link');
+                    
+                    audio.src = audioUrl;
+                    downloadLink.href = audioUrl;
+                    downloadLink.download = `QuickQuote_${new Date().toISOString().slice(0,19).replace(/:/g,"-")}.webm`;
+                    
+                    document.getElementById('audioModal').style.display = 'flex';
+                };
+
+                mediaRecorder.start();
+                btn.classList.add('recording-active');
+            } catch (err) {
+                alert("Microphone access denied or not supported in this context (try localhost or https).");
+                console.error(err);
+            }
+        }
+    }
+
+    function downloadAudio() {
+        document.getElementById('download-link').click();
+    }
+
+    // RSS WITH PROXY
+    async function fetchRSS(url) {
+        try {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(data.contents, "text/xml");
+            const items = xml.querySelectorAll("item");
+            return Array.from(items).slice(0, 15).map(item => ({
+                title: item.querySelector("title")?.textContent || "Untitled",
+                link: item.querySelector("link")?.textContent || "#",
+                pubDate: item.querySelector("pubDate")?.textContent || ""
+            }));
+        } catch (e) { return []; }
+    }
+
+    async function getFeeds() {
+        const bbc = await fetchRSS('https://feeds.bbci.co.uk/news/rss.xml?edition=uk');
+        const bbcS = await fetchRSS('https://feeds.bbci.co.uk/sport/rss.xml');
+        const sky = await fetchRSS('https://feeds.skynews.com/feeds/rss/home.xml');
+        findTenderData = await fetchRSS('https://rss.app/feeds/5K0WkyujGrRu88HH.xml');
+        scienceDailyData = await fetchRSS('https://www.sciencedaily.com/rss/strange_offbeat.xml');
+
+        const ticker = document.getElementById('ticker-feed');
+        const live = '<span class="live-dot"></span>';
+        let html = `<span class="category-tag tag-news">${live} BBC</span>` + bbc.map(i => `<a href="${i.link}" target="_blank" class="ticker-item">${i.title}</a>`).join('');
+        html += `<span class="category-tag tag-sport" style="margin-left:60px;">SPORT</span>` + bbcS.map(i => `<a href="${i.link}" target="_blank" class="ticker-item">${i.title}</a>`).join('');
+        html += `<span class="category-tag tag-sky" style="margin-left:60px;">${live} SKY</span>` + sky.map(i => `<a href="${i.link}" target="_blank" class="ticker-item">${i.title}</a>`).join('');
+        ticker.innerHTML = html;
+        filterDrawer();
+    }
+
+    function filterDrawer() {
+        const term = document.getElementById('drawer-search').value.toLowerCase();
+        const build = (data) => data.filter(i => i.title.toLowerCase().includes(term)).map(i => `
+            <div class="side-feed-item"><a href="${i.link}" target="_blank">${i.title}</a><div class="side-feed-date">${i.pubDate.substring(0, 22)}</div></div>`).join('');
+        document.getElementById('col-2-content').innerHTML = build(findTenderData) || "No entries.";
+        document.getElementById('col-3-content').innerHTML = build(scienceDailyData) || "No entries.";
+    }
+
+    // OUTLOOK DRAWER LOGIC
+    function toggleOutlookDrawer() {
+        document.getElementById('outlook-drawer').classList.toggle('open');
+        document.getElementById('right-drawer').classList.remove('open');
+    }
+    
+    function renderOutlook() {
+        const container = document.getElementById('outlook-content');
+        let html = "";
+        
+        for(let i=0; i<7; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() + i);
+            const dateStr = d.toISOString().split('T')[0];
+            const displayDate = d.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+            
+            const dayEvents = events.filter(e => e.date === dateStr).sort((a,b) => a.time.localeCompare(b.time));
+            
+            if(dayEvents.length > 0) {
+                html += `<div class="outlook-day-group"><div class="outlook-date-header">${displayDate}</div>`;
+                dayEvents.forEach(e => {
+                    html += `
+                    <div class="outlook-item">
+                        <div class="outlook-info">
+                            <span class="outlook-time">${e.time}</span>
+                            <span class="outlook-details">${e.details} ${e.location ? '@ '+e.location : ''}</span>
+                        </div>
+                        <button onclick="editEvent('${e.id}')" class="outlook-btn">✎</button>
+                        <button onclick="deleteEvent('${e.id}')" class="outlook-btn outlook-del">✕</button>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+        }
+        
+        container.innerHTML = html || "<div style='opacity:0.5; padding:20px; text-align:center;'>No upcoming events for the next 7 days.</div>";
+    }
+
+    // CALENDAR
+    const workedWeekends = [{month:0,days:[4],type:'sun'},{month:0,days:[17,18],type:'both'},{month:1,days:[1],type:'sun'},{month:1,days:[14,15],type:'both'},{month:2,days:[1],type:'sun'},{month:2,days:[14,15],type:'both'},{month:2,days:[29],type:'sun'},{month:3,days:[11,12],type:'both'},{month:3,days:[26],type:'sun'},{month:4,days:[9,10],type:'both'},{month:4,days:[24],type:'sun'},{month:5,days:[6,7],type:'both'},{month:5,days:[21],type:'sun'},{month:6,days:[4,5],type:'both'},{month:6,days:[19],type:'sun'},{month:7,days:[1,2],type:'both'},{month:7,days:[16],type:'sun'},{month:7,days:[29,30],type:'both'},{month:8,days:[13],type:'sun'},{month:8,days:[26,27],type:'both'},{month:9,days:[11],type:'sun'},{month:9,days:[24,25],type:'both'},{month:10,days:[8],type:'sun'},{month:10,days:[21,22],type:'both'},{month:11,days:[6],type:'sun'},{month:11,days:[19,20],type:'both'}];
+    function isWorkDay(t) {
+        const d = new Date(t); const day = d.getDay();
+        const check = (x) => workedWeekends.find(s => s.month === x.getMonth() && s.days.includes(x.getDate()));
+        if(day===0||day===6) return !!check(d);
+        if(day===1||day===2){ const ls = new Date(d); ls.setDate(d.getDate()-(day===1?2:3)); if(check(ls)) return false; }
+        if(day===5){ const lu = new Date(d); lu.setDate(d.getDate()-5); const s = check(lu); if(s&&s.type==='sun') return false; }
+        return true;
+    }
+    function renderWeek() {
+        document.getElementById('month-display').innerText = currentWeekStart.toLocaleDateString([], {month:'long', year:'numeric'});
+        let html = ""; const names = ['M','T','W','T','F','S','S'];
+        for(let i=0; i<7; i++){
+            const d = new Date(currentWeekStart); d.setDate(currentWeekStart.getDate() + i);
+            const w = isWorkDay(d); const isToday = d.toDateString() === todayObj.toDateString();
+            const isSel = d.toDateString() === selectedDate.toDateString();
+            html += `<div class="day-circle ${w?'on-shift':'off-shift'} ${isToday?'is-today':''} ${isSel?'selected-day':''}" onclick="selectDay('${d.toISOString()}')"><span style="font-size:0.4rem;opacity:0.6;line-height:1;">${names[i]}</span>${d.getDate()}</div>`;
+        }
+        document.getElementById('week-calendar').innerHTML = html; renderAgenda();
+    }
+    function selectDay(s) { selectedDate = new Date(s); renderWeek(); }
+    function changeWeek(dir) { currentWeekStart.setDate(currentWeekStart.getDate() + (dir * 7)); renderWeek(); }
+    
+    function renderAgenda() {
+        const dayEvents = events.filter(e => new Date(e.date).toDateString() === selectedDate.toDateString());
+        const list = document.getElementById('agenda-list');
+        const now = new Date();
+
+        if(dayEvents.length === 0) {
+            list.innerHTML = `<div style="font-size:0.7rem; opacity:0.3; font-style:italic;">No tasks or interviews...</div>`;
+        } else {
+            list.innerHTML = dayEvents.sort((a,b)=>a.time.localeCompare(b.time)).map(e => {
+                const eventDate = new Date(`${e.date}T${e.time}`);
+                const diffMs = eventDate - now;
+                const diffMins = diffMs / 60000;
+                
+                let statusClass = '';
+                let activeDot = '';
+                let displayTime = e.time;
+
+                if (diffMs > 0) {
+                    // Future: Amber if < 60 mins
+                    if (diffMins <= 60) { statusClass = 'status-amber'; }
+                } else {
+                    // Past/Present
+                    const elapsedMins = Math.abs(diffMins);
+                    if (elapsedMins <= 120) { 
+                        statusClass = 'status-active'; 
+                        displayTime = 'NOW';
+                        activeDot = '<span class="active-dot"></span>';
+                    } else { statusClass = 'status-past'; }
+                }
+
+                return `
+                <div class="event-item ${statusClass}">
+                    ${activeDot}
+                    <div style="font-size:0.6rem; color:var(--accent); font-weight:bold; text-transform:uppercase; ${statusClass && statusClass!=='status-past'?'color:inherit;':''}">${displayTime} ${e.location ? ' @ '+e.location : ''}</div>
+                    <div style="font-size:0.75rem; font-weight:600; line-height:1.2;">${e.details}</div>
+                    <div class="event-tools">
+                        <button onclick="editEvent('${e.id}')">✎</button>
+                        <button onclick="deleteEvent('${e.id}')" class="delete-btn">✕</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    }
+
+    // MODAL
+    function openEventModal() { editingEventId = null; document.getElementById('modal-heading').innerText = "Create Event"; document.getElementById('event-date').value = selectedDate.toISOString().split('T')[0]; document.getElementById('event-time').value = ""; document.getElementById('event-location').value = ""; document.getElementById('event-details').value = ""; document.getElementById('eventModal').style.display = 'flex'; }
+    function closeEventModal() { document.getElementById('eventModal').style.display = 'none'; }
+    function saveEvent() {
+        const d = document.getElementById('event-date').value, t = document.getElementById('event-time').value, l = document.getElementById('event-location').value, det = document.getElementById('event-details').value;
+        if(!d || !det) return alert("Required: Date and Details");
+        if(editingEventId) { const idx = events.findIndex(e => e.id === editingEventId); events[idx] = {id: editingEventId, date: d, time: t, location: l, details: det}; } 
+        else { events.push({id: Date.now().toString(), date: d, time: t, location: l, details: det}); }
+        localStorage.setItem('newsroom-events-final', JSON.stringify(events)); closeEventModal(); renderWeek(); renderOutlook();
+    }
+    function editEvent(id) { const ev = events.find(e => e.id === id); editingEventId = id; document.getElementById('modal-heading').innerText = "Update Event"; document.getElementById('event-date').value = ev.date; document.getElementById('event-time').value = ev.time; document.getElementById('event-location').value = ev.location; document.getElementById('event-details').value = ev.details; document.getElementById('eventModal').style.display = 'flex'; }
+    function deleteEvent(id) { if(confirm("Remove entry?")) { events = events.filter(e => e.id !== id); localStorage.setItem('newsroom-events-final', JSON.stringify(events)); renderWeek(); renderOutlook(); } }
+
+    // STORY
+    function deleteActiveNote() { if(confirm("Delete current story?")) { notes = notes.filter(n => n.id !== activeId); if(!notes.some(n => !n.filed)) createNewNote(); else activeId = notes.find(n => !n.filed).id; save(); } }
+    function save() { localStorage.setItem('newsroom-notes-final', JSON.stringify(notes)); const active = notes.find(n => n.id === activeId); document.getElementById('story-editor').value = active?.content || ""; document.getElementById('catchline-input').value = active?.title || ""; renderTabs(); updateWordCount(); }
+    function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false}; notes.push(n); activeId = n.id; save(); }
+    function switchNote(id) { activeId = id; save(); }
+    function fileNote() { const n = notes.find(x => x.id === activeId); if(n) { n.filed = true; const next = notes.find(x => !x.filed); activeId = next ? next.id : null; if(!activeId) createNewNote(); save(); } }
+    function renderTabs() {
+        const active = notes.filter(n => !n.filed);
+        document.getElementById('tab-bar').innerHTML = active.map(n => `<div class="tab ${n.id === activeId ? 'active' : ''}" onclick="switchNote(${n.id})">${n.title || 'Draft'}</div>`).join('') + '<button onclick="createNewNote()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1.4rem;padding:0 10px;">+</button>';
+        const filed = notes.filter(n => n.filed); document.getElementById('filed-count').innerText = `(${filed.length})`;
+        document.getElementById('filed-list').innerHTML = filed.map(n => `<div class="filed-item"><span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled'}</span><button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button></div>`).join('');
+    }
+    function unfileNote(id) { const n = notes.find(x => x.id === id); if(n) { n.filed = false; activeId = id; save(); } }
+    function permDeleteNote(id) { if(confirm("Permanent removal?")) { notes = notes.filter(n => n.id !== id); save(); } }
+
+    // UTILS & SEARCH
+    function updateWordCount() { const text = document.getElementById('story-editor').value; const count = text.trim() ? text.trim().split(/\s+/).length : 0; document.getElementById('word-count').innerText = `WORDS: ${count}`; }
+    
+    // TASK LOGIC
+    function addSortItem() { const i = document.getElementById('sort-input'); if(i.value) { sortItems.push(i.value); i.value = ""; localStorage.setItem('newsroom-sort-final', JSON.stringify(sortItems)); renderSort(); } }
+    function renderSort() { 
+        document.getElementById('sort-list').innerHTML = sortItems.map((s, idx) => `
+        <div class="sort-item">
+            <span>${s}</span>
+            <button onclick="completeTask(this, ${idx})" style="background:#4CAF50; border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px;">✓</button>
+        </div>`).join(''); 
+    }
+    function completeTask(btn, idx) {
+        const item = btn.closest('.sort-item');
+        item.classList.add('completed');
+        setTimeout(() => {
+            sortItems.splice(idx, 1);
+            localStorage.setItem('newsroom-sort-final', JSON.stringify(sortItems));
+            renderSort();
+        }, 550);
+    }
+    
+    function runGlobalSearch() {
+        const term = document.getElementById('global-search-input').value.toLowerCase();
+        const resBox = document.getElementById('search-results');
+        if(!term) return resBox.innerHTML = "";
+        let html = "";
+        
+        notes.forEach(n => { 
+            if(n.title.toLowerCase().includes(term) || n.content.toLowerCase().includes(term)) {
+                html += `
+                <div class="search-item" onclick="switchNote(${n.id})">
+                    <span class="type-tag ${n.filed?'tag-archive':'tag-note'}">${n.filed?'ARCHIVE':'STORY'}</span>
+                    <span class="search-title">${n.title || 'Untitled'}</span>
+                </div>`; 
+            }
+        });
+        
+        events.forEach(e => { 
+            if(e.details.toLowerCase().includes(term) || (e.location && e.location.toLowerCase().includes(term))) {
+                html += `
+                <div class="search-item" onclick="selectDay('${e.date}')">
+                    <span class="type-tag tag-event">EVENT</span>
+                    <span class="search-title">${e.details}</span>
+                    <span class="search-meta">${new Date(e.date).toLocaleDateString([],{month:'short',day:'numeric'})}</span>
+                </div>`; 
+            }
+        });
+
+        sortItems.forEach(s => {
+            if(s.toLowerCase().includes(term)) {
+                html += `
+                <div class="search-item">
+                    <span class="type-tag tag-task">TASK</span>
+                    <span class="search-title">${s}</span>
+                </div>`;
+            }
+        });
+        
+        resBox.innerHTML = html || "<div style='font-size:0.7rem; opacity:0.5; padding:5px;'>No matches found.</div>";
+    }
+
+    // ZEN MODE
+    function toggleZenMode() {
+        document.body.classList.toggle('zen-mode');
+        document.getElementById('side-drawer').classList.remove('open');
+        document.getElementById('right-drawer').classList.remove('open');
+        document.getElementById('outlook-drawer').classList.remove('open');
+    }
+    function toggleRightDrawer() { 
+        document.getElementById('right-drawer').classList.toggle('open'); 
+        document.getElementById('outlook-drawer').classList.remove('open');
+    }
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape" && document.body.classList.contains('zen-mode')) {
+            toggleZenMode();
+        }
+    });
+
+    function exportWorkspace() { const data = { notes, events, tasks: sortItems, scraps: document.getElementById('quick-scraps').value }; const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Newsroom-Backup.json`; a.click(); }
+    function triggerImport() { document.getElementById('import-input').click(); }
+    function importWorkspace(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const d = JSON.parse(e.target.result); notes = d.notes; events = d.events; sortItems = d.tasks; document.getElementById('quick-scraps').value = d.scraps || ""; activeId = notes.find(n => !n.filed)?.id || notes[0].id; save(); renderWeek(); renderSort(); renderOutlook(); }; reader.readAsText(file); }
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    function toggleDrawer() { document.getElementById('side-drawer').classList.toggle('open'); }
+    function toggleRightDrawer() { document.getElementById('right-drawer').classList.toggle('open'); }
+    function toggleFiled() { const l = document.getElementById('filed-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
+    function updateTime() { 
+        const n = new Date(); 
+        const display = document.getElementById('clock-digital');
+        if(clockMode === 'digital') {
+            display.style.display = 'block';
+            document.getElementById('clock-analog').style.display = 'none';
+            display.innerText = n.toLocaleTimeString([], {hour12:false});
+        } 
+        document.getElementById('date-display').innerText = n.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'}); 
+        let h = n.getHours(), g = "Evening"; if(h<12) g="Morning"; else if(h<17) g="Afternoon"; document.getElementById('greeting').innerText = `Good ${g}, Thomas`; 
+        
+        // Analog Clock Flash Logic
+        const sec = n.getSeconds();
+        const min = n.getMinutes();
+        const analogClock = document.getElementById('clock-analog');
+        if (min === 0 && sec === 0) {
+            analogClock.classList.add('clock-flash');
+            setTimeout(() => { analogClock.classList.remove('clock-flash'); }, 1500);
+        }
+
+        renderAgenda(); 
+    }
+    function fileAndEmail() { const n = notes.find(x => x.id === activeId); if(!n) return; const btn = document.getElementById('email-btn'); btn.innerText = "Sending..."; document.getElementById('hidden-title').value = n.title; document.getElementById('hidden-message').value = n.content; document.getElementById('hidden-time').value = new Date().toLocaleString(); emailjs.sendForm('service_i7fjjgg', 'template_591ycw8', document.getElementById('email-bridge-form')).then(() => { btn.innerHTML = 'Sent <svg class="success-tick" viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>'; setTimeout(() => { fileNote(); btn.innerText = "File & Email"; }, 1500); }); }
+
+    document.getElementById('quick-scraps').value = localStorage.getItem('newsroom-scraps') || "";
+    document.getElementById('quick-scraps').addEventListener('input', e => localStorage.setItem('newsroom-scraps', e.target.value));
+    document.getElementById('catchline-input').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) { n.title = e.target.value; renderTabs(); } });
+    document.getElementById('story-editor').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) n.content = e.target.value; updateWordCount(); });
+
+    setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook();
+</script>
+</body>
+</html>
