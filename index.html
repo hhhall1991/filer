@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Personal Newsroom Dashboard</title>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -44,7 +44,7 @@
             --icon-btn-color: #e0e0e0;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--beige-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
         
         /* --- HEADER --- */
@@ -66,7 +66,25 @@
         .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
         /* Mobile Header Controls */
-        .mobile-controls-left, .mobile-controls-right { display: none; }
+        .mobile-controls-left, .mobile-controls-right { display: none; } /* Hidden on desktop */
+        .mob-btn { 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            color: var(--text); 
+            opacity: 0.7; 
+            padding: 8px; /* Larger touch target */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-appearance: none; /* iOS Fix */
+        }
+        .mob-btn svg { width: 24px; height: 24px; fill: currentColor; display: block; }
+        
+        /* Hover fix for touch devices */
+        @media (hover: hover) {
+            .mob-btn:hover { opacity: 1; color: var(--accent); }
+        }
 
         .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
         
@@ -145,6 +163,7 @@
         .audio-mic-lg.recording svg { fill: #ff4444; opacity: 1; }
         @keyframes pulse-red-border { 0% { border-color: #ff4444; } 50% { border-color: transparent; } 100% { border-color: #ff4444; } }
 
+        /* Flag Button */
         #mic-flag-btn { display: none; background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-top: 10px; z-index: 10; cursor: pointer; }
         .audio-mic-lg.recording #mic-flag-btn { display: inline-block; }
 
@@ -348,7 +367,7 @@
             header { 
                 padding: 10px 15px; 
                 height: auto; 
-                flex-direction: row; 
+                display: flex;
                 flex-wrap: wrap;
                 justify-content: space-between; 
                 align-items: center;
@@ -356,11 +375,20 @@
             }
             
             /* Show Mobile Controls */
-            .mobile-controls-left, .mobile-controls-right { display: flex; align-items: center; gap: 10px; }
+            .mobile-controls-left, .mobile-controls-right { 
+                display: flex; 
+                align-items: center; 
+                gap: 12px; 
+                flex: 1; /* Distribute space evenly */
+            }
+            .mobile-controls-right { justify-content: flex-end; }
+            
             .desktop-controls { display: none; } /* Hide desktop toolbar on mobile */
             
-            .clock-wrapper { flex-grow: 0; justify-content: center; margin: 0; }
-            #clock-digital { font-size: 2.2rem; }
+            .clock-wrapper { flex: 0 0 auto; justify-content: center; margin: 0; }
+            #clock-digital { font-size: 1.8rem; } /* Slightly smaller for mobile fitting */
+            
+            /* Ticker moves to second row */
             .ticker-wrap { width: 100%; border-radius: 8px; order: 5; margin-top: 5px; } 
 
             /* Stack Sidebar FIRST, Editor SECOND */
@@ -950,22 +978,48 @@
     function renderOutlook() {
         const container = document.getElementById('outlook-content');
         let html = "";
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
         
         for(let i=0; i<7; i++) {
             const d = new Date();
             d.setDate(d.getDate() + i);
             const dateStr = d.toISOString().split('T')[0];
-            const displayDate = d.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+            
+            // Smart Headers: Today/Tomorrow vs Date
+            let displayDate = d.toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+            if(d.toDateString() === now.toDateString()) displayDate = "TODAY";
+            else if(d.toDateString() === tomorrow.toDateString()) displayDate = "TOMORROW";
             
             const dayEvents = events.filter(e => e.date === dateStr).sort((a,b) => a.time.localeCompare(b.time));
             
             if(dayEvents.length > 0) {
                 html += `<div class="outlook-day-group"><div class="outlook-date-header">${displayDate}</div>`;
                 dayEvents.forEach(e => {
+                    // Logic for Status Colors in Outlook
+                    const eventDate = new Date(`${e.date}T${e.time}`);
+                    const diffMs = eventDate - now;
+                    const diffMins = diffMs / 60000;
+                    let statusClass = '';
+                    let activeDot = '';
+                    let displayTime = e.time;
+
+                    if (diffMs > 0) {
+                        if (diffMins <= 60) { statusClass = 'status-amber'; }
+                    } else {
+                        const elapsedMins = Math.abs(diffMins);
+                        if (elapsedMins <= 120) { 
+                            statusClass = 'status-active'; 
+                            displayTime = 'NOW';
+                            activeDot = '<span class="live-dot" style="margin-right:5px"></span>';
+                        } else { statusClass = 'status-past'; }
+                    }
+
                     html += `
-                    <div class="outlook-item">
+                    <div class="outlook-item ${statusClass}">
                         <div class="outlook-info">
-                            <span class="outlook-time">${e.time}</span>
+                            <span class="outlook-time" style="${statusClass === 'status-active' ? 'color:var(--work-text); font-weight:900;' : ''}">${activeDot}${displayTime}</span>
                             <span class="outlook-details">${e.details} ${e.location ? '@ '+e.location : ''}</span>
                         </div>
                         <button onclick="editEvent('${e.id}')" class="outlook-btn">✎</button>
@@ -1021,9 +1075,11 @@
                 let displayTime = e.time;
 
                 if (diffMs > 0) {
+                    // Future: Amber if < 60 mins
                     if (diffMins <= 60 && diffMins > 15) { statusClass = 'status-amber'; }
                     else if (diffMins <= 15) { statusClass = 'status-green'; }
                 } else {
+                    // Past/Present
                     const elapsedMins = Math.abs(diffMins);
                     if (elapsedMins <= 120) { 
                         statusClass = 'status-active'; 
