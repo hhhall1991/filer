@@ -48,17 +48,25 @@
         body { background-color: var(--beige-bg); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
         
         /* --- HEADER --- */
-        header { padding: 15px 40px; display: flex; align-items: center; gap: 30px; height: 90px; }
+        header { padding: 15px 40px; display: flex; align-items: center; gap: 20px; height: 90px; }
+        
+        /* HEADER CONTROLS (DESKTOP) */
+        .desktop-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            padding: 0 15px; 
+            border-left: 1px solid var(--border-muted); 
+            border-right: 1px solid var(--border-muted); 
+            height: 40px; 
+            flex-shrink: 0;
+        }
+        .ctrl-btn { background: none; border: none; cursor: pointer; color: var(--text); opacity: 0.5; padding: 5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .ctrl-btn:hover { opacity: 1; transform: scale(1.1); color: var(--accent); }
+        .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
         /* Mobile Header Controls */
-        .mobile-controls-left, .mobile-controls-right { display: none; gap: 15px; }
-        .mob-btn { background: none; border: none; cursor: pointer; color: var(--text); opacity: 0.6; padding: 5px; }
-        .mob-btn svg { width: 24px; height: 24px; fill: currentColor; }
-        
-        /* Hover fix for touch devices */
-        @media (hover: hover) {
-            .mob-btn:hover { opacity: 1; color: var(--accent); }
-        }
+        .mobile-controls-left, .mobile-controls-right { display: none; }
 
         .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
         
@@ -93,19 +101,33 @@
         .ticker-item { display: inline-block; padding: 0 30px; font-size: 0.95rem; color: #555; text-decoration: none; border-right: 1px solid var(--border-muted); vertical-align: middle; }
         body.dark-mode .ticker-item { color: #aaa; }
 
-        .category-tag { font-weight: 900; color: #222; margin-right: 10px; padding: 4px 12px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 0.8rem; vertical-align: middle; }
+        .category-tag { font-weight: 900; color: #222; margin-right: 12px; padding: 4px 12px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 0.8rem; vertical-align: middle; flex-shrink: 0; }
         .tag-news { background-color: #ffcccb; }
         .tag-sport { background-color: #fff9c4; }
         .tag-sky { background-color: #add8e6; }
-        .live-dot { height: 8px; width: 8px; background-color: #ff0000; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blink 1s infinite; }
+        .live-dot { height: 8px; width: 8px; background-color: #ff0000; border-radius: 50%; display: inline-block; margin-right: 8px; animation: blink 1s infinite; flex-shrink: 0; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* --- LEFT DRAWER 1 (WIRES) --- */
-        #wires-drawer { position: fixed; left: -1000px; top: 0; width: 1000px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; }
-        #wires-drawer.open { left: 0; }
-        #wires-tab { position: fixed; left: 0; top: 42%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: left 0.3s; }
+        /* --- DRAWERS (SHARED) --- */
+        .drawer-panel { position: fixed; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; box-shadow: 0 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
+        /* Left Drawers */
+        #wires-drawer { left: -1000px; width: 1000px; }
+        #wires-drawer.open { left: 0; }
+        #audio-drawer { left: -360px; }
+        #audio-drawer.open { left: 0; }
+
+        /* Right Drawers */
+        #right-drawer { right: -360px; }
+        #right-drawer.open { right: 0; }
+        #outlook-drawer { right: -360px; }
+        #outlook-drawer.open { right: 0; }
+
+        /* Hide Old Side Tabs */
+        #wires-tab, #audio-tab, #right-drawer-tab, #outlook-tab { display: none; }
+
+        /* Content Styles */
         #side-feed-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-grow: 1; overflow: hidden; }
         .col-title { font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; font-weight: 800; border-bottom: 2px solid var(--border-muted); padding-bottom: 6px; letter-spacing: 1px; }
         .feed-column { overflow-y: auto; padding-right: 8px; }
@@ -115,11 +137,6 @@
         @media (hover: hover) { .side-feed-item a:hover { color: var(--accent); } }
         .side-feed-date { font-size: 0.7rem; opacity: 0.5; margin-top: 5px; font-weight: 400; }
 
-        /* --- LEFT DRAWER 2 (AUDIO) --- */
-        #audio-drawer { position: fixed; left: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        #audio-drawer.open { left: 0; }
-        #audio-tab { position: fixed; left: 0; top: 58%; transform: translateY(-50%); background: #7f8c8d; color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: left 0.3s; }
-
         /* Audio Panel Styles */
         .audio-mic-lg { width: 100%; background: rgba(0,0,0,0.05); border: 2px dashed var(--border-muted); border-radius: 12px; padding: 20px; margin-bottom: 20px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; }
         @media (hover: hover) { .audio-mic-lg:hover { background: rgba(0,0,0,0.1); border-color: var(--accent); } }
@@ -128,7 +145,6 @@
         .audio-mic-lg.recording svg { fill: #ff4444; opacity: 1; }
         @keyframes pulse-red-border { 0% { border-color: #ff4444; } 50% { border-color: transparent; } 100% { border-color: #ff4444; } }
 
-        /* Flag Button (Hidden unless recording) */
         #mic-flag-btn { display: none; background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-top: 10px; z-index: 10; cursor: pointer; }
         .audio-mic-lg.recording #mic-flag-btn { display: inline-block; }
 
@@ -150,21 +166,23 @@
         @media (hover: hover) { .bookmark-chip:hover { transform: scale(1.05); } }
         .bookmark-icon { color: var(--off-text); font-weight: bold; }
 
-        /* --- RIGHT DRAWER 1 (SCRATCHPAD & CALCULATOR) --- */
-        #right-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        #right-drawer.open { right: 0; }
-        #right-drawer-tab { position: fixed; right: 0; top: 42%; transform: translateY(-50%); background: #7f8c8d; color: white; padding: 15px 6px; border-radius: 8px 0 0 8px; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: right 0.3s; }
-
-        /* --- RIGHT DRAWER 2 (UPCOMING OUTLOOK) --- */
-        #outlook-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
-        #outlook-drawer.open { right: 0; }
-        #outlook-tab { position: fixed; right: 0; top: 58%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 8px 0 0 8px; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: right 0.3s; }
-
         /* Outlook Content Styles */
         .outlook-day-group { margin-bottom: 20px; }
         .outlook-date-header { font-size: 0.75rem; font-weight: 800; color: var(--accent); border-bottom: 2px solid var(--border-muted); margin-bottom: 8px; padding-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .outlook-item { font-size: 0.8rem; margin-bottom: 6px; padding: 6px; background: rgba(0,0,0,0.03); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .outlook-item { font-size: 0.8rem; margin-bottom: 6px; padding: 6px; background: rgba(0,0,0,0.03); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid transparent; transition: all 0.2s; position: relative; }
         body.dark-mode .outlook-item { background: rgba(255,255,255,0.05); }
+        
+        /* Outlook Status Colors */
+        .outlook-item.status-amber { background-color: #fff8e1 !important; border-left-color: #ffb300 !important; }
+        body.dark-mode .outlook-item.status-amber { background-color: rgba(255, 179, 0, 0.15) !important; color: #ffe082; }
+        
+        .outlook-item.status-active { 
+            background-color: var(--work-green) !important; 
+            border-left-color: var(--work-text) !important; 
+            color: var(--work-text) !important; 
+        }
+        body.dark-mode .outlook-item.status-active { background-color: rgba(46, 125, 50, 0.35) !important; color: #81c784 !important; }
+
         .outlook-info { flex-grow: 1; display: flex; align-items: flex-start; }
         .outlook-time { font-weight: bold; margin-right: 8px; color: var(--text); opacity: 0.8; font-size: 0.75rem; min-width: 40px; }
         .outlook-details { line-height: 1.3; }
@@ -299,7 +317,7 @@
 
         /* ZEN MODE */
         body.zen-mode header { display: none; }
-        body.zen-mode #wires-tab, body.zen-mode #audio-tab, body.zen-mode #right-drawer-tab, body.zen-mode #outlook-tab { transform: translateY(-50%) scaleX(0); }
+        body.zen-mode #wires-drawer, body.zen-mode #audio-drawer, body.zen-mode #right-drawer, body.zen-mode #outlook-drawer { display: none; }
         body.zen-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
         body.zen-mode .card:last-child { display: none; }
         body.zen-mode .card:first-child { box-shadow: none; background: transparent; border: none; padding: 40px 0; }
@@ -332,19 +350,18 @@
                 height: auto; 
                 flex-direction: row; 
                 flex-wrap: wrap;
-                justify-content: center;
+                justify-content: space-between; 
+                align-items: center;
                 gap: 10px; 
             }
             
             /* Show Mobile Controls */
-            .mobile-controls-left, .mobile-controls-right { display: flex; align-items: center; }
+            .mobile-controls-left, .mobile-controls-right { display: flex; align-items: center; gap: 10px; }
+            .desktop-controls { display: none; } /* Hide desktop toolbar on mobile */
             
-            /* Hide Desktop Side Tabs */
-            #wires-tab, #audio-tab, #right-drawer-tab, #outlook-tab { display: none; }
-
-            .clock-wrapper { flex-grow: 0; justify-content: center; margin: 0 10px; }
+            .clock-wrapper { flex-grow: 0; justify-content: center; margin: 0; }
             #clock-digital { font-size: 2.2rem; }
-            .ticker-wrap { width: 100%; border-radius: 8px; order: 3; } /* Ticker is row 2 */
+            .ticker-wrap { width: 100%; border-radius: 8px; order: 5; margin-top: 5px; } 
 
             /* Stack Sidebar FIRST, Editor SECOND */
             main { 
@@ -360,12 +377,12 @@
             /* SLIDE DOWN DRAWERS */
             #wires-drawer, #audio-drawer, #right-drawer, #outlook-drawer {
                 width: 100%;
-                height: 90vh; /* Covers most of screen */
+                height: 90vh; 
                 left: 0 !important;
                 right: 0 !important;
-                top: -120vh; /* Hidden ABOVE screen */
+                top: -120vh; 
                 transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                border-radius: 0 0 20px 20px; /* Rounded bottom corners */
+                border-radius: 0 0 20px 20px; 
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                 z-index: 5000;
             }
@@ -392,7 +409,7 @@
 
 <button id="exit-zen-btn" onclick="toggleZenMode()">Exit Zen Mode (Esc)</button>
 
-<div id="wires-drawer">
+<div id="wires-drawer" class="drawer-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">WIRE FEEDS</span>
         <button onclick="toggleWiresDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
@@ -409,9 +426,8 @@
         </div>
     </div>
 </div>
-<div id="wires-tab" onclick="toggleWiresDrawer()">WIRES</div>
 
-<div id="audio-drawer">
+<div id="audio-drawer" class="drawer-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">AUDIO LIBRARY</span>
         <button onclick="toggleAudioDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
@@ -427,9 +443,8 @@
     <div id="audio-list" class="audio-list">
         </div>
 </div>
-<div id="audio-tab" onclick="toggleAudioDrawer()">AUDIO</div>
 
-<div id="right-drawer">
+<div id="right-drawer" class="drawer-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">SCRATCHPAD</span>
         <button onclick="toggleRightDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
@@ -448,16 +463,14 @@
         </div>
     </div>
 </div>
-<div id="right-drawer-tab" onclick="toggleRightDrawer()">SCRATCHPAD</div>
 
-<div id="outlook-drawer">
+<div id="outlook-drawer" class="drawer-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">UPCOMING WEEK</span>
         <button onclick="toggleOutlookDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
     </div>
     <div id="outlook-content"></div>
 </div>
-<div id="outlook-tab" onclick="toggleOutlookDrawer()">UPCOMING</div>
 
 <header>
     <div class="mobile-controls-left">
@@ -465,14 +478,11 @@
             <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
         </button>
         <button class="mob-btn" onclick="toggleAudioDrawer()" title="Audio">
-            <svg viewBox="0 0 24 24"><path d="M12 3v9.28a4.39 4.39 0 0 0-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         </button>
     </div>
 
     <div class="clock-wrapper" onclick="toggleClockMode()">
-        <div id="clock-digital">
-            <span id="clock-hm">00:00</span><span id="clock-s">00</span>
-        </div>
         <svg id="clock-analog" class="clock-face" viewBox="0 0 100 100">
             <circle class="clock-face" cx="50" cy="50" r="48" />
             <circle class="clock-center" cx="50" cy="50" r="2" />
@@ -480,6 +490,24 @@
             <line id="min-hand" class="clock-hand hand-min" x1="50" y1="50" x2="50" y2="15" />
             <line id="sec-hand" class="clock-hand hand-sec" x1="50" y1="50" x2="50" y2="10" />
         </svg>
+        <div id="clock-digital">
+            <span id="clock-hm">00:00</span><span id="clock-s">00</span>
+        </div>
+    </div>
+
+    <div class="desktop-controls">
+        <button class="ctrl-btn" onclick="toggleWiresDrawer()" title="Wires">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="toggleAudioDrawer()" title="Audio">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="toggleRightDrawer()" title="Scratchpad">
+            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="toggleOutlookDrawer()" title="Upcoming">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+        </button>
     </div>
 
     <div class="mobile-controls-right">
@@ -516,7 +544,6 @@
 
     <section class="card">
         <div class="sidebar-container">
-            
             <div class="sidebar-section">
                 <div class="sidebar-header-row">
                     <div id="date-display" style="font-weight:900; font-size:1.1rem;">Date</div>
@@ -612,7 +639,7 @@
     let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false}];
     let activeId = notes.find(n => !n.filed)?.id || notes[0].id;
     let editingEventId = null;
-    let clockMode = 'analog'; // DEFAULT TO ANALOG
+    let clockMode = 'analog'; 
     let animationFrameId = null;
     let mediaRecorder;
     let audioChunks = [];
@@ -624,7 +651,7 @@
     
     // INDEXEDDB SETUP
     let db;
-    const dbRequest = indexedDB.open("NewsroomAudioDB", 2); // Version 2 for bookmarks
+    const dbRequest = indexedDB.open("NewsroomAudioDB", 2);
     dbRequest.onupgradeneeded = (event) => {
         const d = event.target.result;
         if (!d.objectStoreNames.contains("recordings")) {
