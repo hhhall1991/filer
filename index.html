@@ -191,6 +191,10 @@
         .header-tool-btn { background: transparent; border: none; cursor: pointer; color: var(--text); opacity: 0.4; padding: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .header-tool-btn:hover { opacity: 1; color: var(--accent); transform: scale(1.1); }
         .header-tool-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        
+        /* Recording Animation */
+        .recording-active { color: #ff4444 !important; opacity: 1 !important; animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
         /* --- SEARCH & ARCHIVE --- */
         .search-item, .filed-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
@@ -285,8 +289,30 @@
         .modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 350px; }
         .modal-content input, .modal-content textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
 
+        /* Audio Modal */
+        #audioModal { display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .audio-modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 320px; text-align: center; }
+        .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        /* --- MOBILE / IPHONE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            body { height: auto; overflow-y: auto; overflow-x: hidden; }
+            header { padding: 10px 15px; height: auto; flex-direction: column; gap: 15px; }
+            .clock-wrapper { width: 100%; justify-content: center; }
+            #clock-digital { font-size: 2.2rem; }
+            .ticker-wrap { width: 100%; border-radius: 8px; }
+            main { display: flex; flex-direction: column-reverse; padding: 15px; gap: 30px; height: auto; }
+            .card { width: 100%; height: auto; min-height: 600px; overflow: visible; }
+            #side-drawer, #wires-drawer, #audio-drawer { width: 100%; left: -100%; }
+            #right-drawer, #outlook-drawer { width: 100%; right: -100%; }
+            #drawer-tab, #wires-tab, #audio-tab, #right-drawer-tab, #outlook-tab { padding: 10px 4px; font-size: 0.6rem; width: 25px; }
+            .modal-content, .audio-modal-content { width: 90%; }
+            .editor-footer { flex-direction: column; gap: 15px; align-items: stretch; }
+            .footer-buttons { display: flex; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
@@ -580,7 +606,6 @@
         const panelBtn = document.getElementById('mic-panel-btn');
         const panelLabel = document.getElementById('mic-label');
         
-        // Check state
         if (mediaRecorder && mediaRecorder.state === "recording") {
             mediaRecorder.stop();
             if(quickBtn) quickBtn.classList.remove('recording-active');
@@ -609,7 +634,6 @@
                     stream.getTracks().forEach(track => track.stop());
 
                     if (isQuickQuote) {
-                        // Quick Quote Behavior: Modal & Download
                         const audioUrl = URL.createObjectURL(audioBlob);
                         const audio = document.getElementById('audio-playback');
                         const downloadLink = document.getElementById('download-link');
@@ -618,7 +642,6 @@
                         downloadLink.download = `QuickQuote_${Date.now()}.${recordingExtension}`;
                         document.getElementById('audioModal').style.display = 'flex';
                     } else {
-                        // Library Behavior: Save to DB
                         const transaction = db.transaction(["recordings"], "readwrite");
                         const store = transaction.objectStore("recordings");
                         const newItem = {
@@ -828,9 +851,10 @@
                 let displayTime = e.time;
 
                 if (diffMs > 0) {
-                    if (diffMins <= 60 && diffMins > 15) { statusClass = 'status-amber'; }
-                    else if (diffMins <= 15) { statusClass = 'status-green'; }
+                    // Future: Amber if < 60 mins
+                    if (diffMins <= 60) { statusClass = 'status-amber'; }
                 } else {
+                    // Past/Present
                     const elapsedMins = Math.abs(diffMins);
                     if (elapsedMins <= 120) { 
                         statusClass = 'status-active'; 
