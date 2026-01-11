@@ -64,7 +64,6 @@
         .hand-sec { stroke-width: 1.5; stroke: var(--accent); }
         .clock-center { fill: var(--text); }
 
-        /* Clock Flash Animation */
         @keyframes flash-twice {
             0%, 100% { opacity: 1; }
             25% { opacity: 0.1; }
@@ -88,10 +87,10 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-        /* --- LEFT DRAWER (FEEDS) --- */
-        #side-drawer { position: fixed; left: -1000px; top: 0; width: 1000px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; }
-        #side-drawer.open { left: 0; }
-        #drawer-tab { position: fixed; left: 0; top: 50%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: transform 0.3s; }
+        /* --- LEFT DRAWER 1 (WIRES) --- */
+        #wires-drawer { position: fixed; left: -1000px; top: 0; width: 1000px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; }
+        #wires-drawer.open { left: 0; }
+        #wires-tab { position: fixed; left: 0; top: 42%; transform: translateY(-50%); background: var(--accent); color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: left 0.3s; }
         
         #side-feed-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-grow: 1; overflow: hidden; }
         .col-title { font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; font-weight: 800; border-bottom: 2px solid var(--border-muted); padding-bottom: 6px; letter-spacing: 1px; }
@@ -101,6 +100,31 @@
         .side-feed-item a { text-decoration: none; color: var(--text); font-size: 0.85rem; font-weight: 600; display: block; line-height: 1.4; transition: color 0.2s; }
         .side-feed-item a:hover { color: var(--accent); }
         .side-feed-date { font-size: 0.7rem; opacity: 0.5; margin-top: 5px; font-weight: 400; }
+
+        /* --- LEFT DRAWER 2 (AUDIO) --- */
+        #audio-drawer { position: fixed; left: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
+        #audio-drawer.open { left: 0; }
+        #audio-tab { position: fixed; left: 0; top: 58%; transform: translateY(-50%); background: #7f8c8d; color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: left 0.3s; }
+
+        /* Audio Panel Styles */
+        .audio-mic-lg { width: 100%; background: rgba(0,0,0,0.05); border: 2px dashed var(--border-muted); border-radius: 12px; padding: 20px; margin-bottom: 20px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        .audio-mic-lg:hover { background: rgba(0,0,0,0.1); border-color: var(--accent); }
+        .audio-mic-lg svg { width: 32px; height: 32px; fill: var(--text); opacity: 0.6; }
+        .audio-mic-lg.recording { background: #ffebee; border-color: #ff4444; animation: pulse-red-border 1.5s infinite; color: #ff4444; }
+        .audio-mic-lg.recording svg { fill: #ff4444; opacity: 1; }
+        @keyframes pulse-red-border { 0% { border-color: #ff4444; } 50% { border-color: transparent; } 100% { border-color: #ff4444; } }
+
+        .audio-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .audio-item { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border-muted); }
+        body.dark-mode .audio-item { background: rgba(255,255,255,0.05); }
+        .audio-header { display: flex; justify-content: space-between; align-items: center; }
+        .audio-date { font-size: 0.75rem; font-weight: bold; color: var(--accent); }
+        .audio-time { font-size: 0.65rem; opacity: 0.6; }
+        .audio-player { width: 100%; height: 30px; }
+        .audio-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+        .audio-action-btn { background: none; border: none; font-size: 0.7rem; cursor: pointer; opacity: 0.6; }
+        .audio-action-btn:hover { opacity: 1; text-decoration: underline; }
+        .audio-del { color: #ff4444; }
 
         /* --- RIGHT DRAWER 1 (SCRATCHPAD & CALCULATOR) --- */
         #right-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
@@ -143,6 +167,17 @@
         main { display: grid; grid-template-columns: 1fr 360px; gap: 20px; padding: 0 40px 30px 40px; flex-grow: 1; height: calc(100% - 90px); overflow: hidden; transition: all 0.5s ease; }
         .card { background: var(--paper); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; overflow: hidden; position: relative; transition: all 0.5s ease; }
         
+        /* --- SIDEBAR TOOLS --- */
+        .card-header-tools { position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 10px; z-index: 10; }
+        .header-tool-btn { background: transparent; border: 1px solid var(--border-muted); border-radius: 4px; cursor: pointer; color: var(--accent); padding: 4px 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .header-tool-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .header-tool-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+        .icon-sun { display: none; }
+        .icon-moon { display: block; }
+        body.dark-mode .icon-sun { display: block; }
+        body.dark-mode .icon-moon { display: none; }
+
         /* --- SIDEBAR ZONES --- */
         .sidebar-container { display: flex; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; padding-right: 5px; }
         .sidebar-section { border-bottom: 1px solid var(--border-muted); padding-bottom: 15px; }
@@ -156,20 +191,6 @@
         .header-tool-btn { background: transparent; border: none; cursor: pointer; color: var(--text); opacity: 0.4; padding: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .header-tool-btn:hover { opacity: 1; color: var(--accent); transform: scale(1.1); }
         .header-tool-btn svg { width: 16px; height: 16px; fill: currentColor; }
-        
-        /* Recording Animation */
-        .recording-active { color: #ff4444 !important; opacity: 1 !important; animation: pulse-red 1.5s infinite; }
-        @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
-        /* Audio Modal */
-        #audioModal { display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .audio-modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 320px; text-align: center; }
-        .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
-
-        .icon-sun { display: none; }
-        .icon-moon { display: block; }
-        body.dark-mode .icon-sun { display: block; }
-        body.dark-mode .icon-moon { display: none; }
 
         /* --- SEARCH & ARCHIVE --- */
         .search-item, .filed-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
@@ -249,7 +270,7 @@
 
         /* ZEN MODE */
         body.zen-mode header { display: none; }
-        body.zen-mode #drawer-tab, body.zen-mode #right-drawer-tab, body.zen-mode #outlook-tab { transform: translateY(-50%) scaleX(0); }
+        body.zen-mode #wires-tab, body.zen-mode #audio-tab, body.zen-mode #right-drawer-tab, body.zen-mode #outlook-tab { transform: translateY(-50%) scaleX(0); }
         body.zen-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
         body.zen-mode .card:last-child { display: none; }
         body.zen-mode .card:first-child { box-shadow: none; background: transparent; border: none; padding: 40px 0; }
@@ -272,10 +293,10 @@
 
 <button id="exit-zen-btn" onclick="toggleZenMode()">Exit Zen Mode (Esc)</button>
 
-<div id="side-drawer">
+<div id="wires-drawer">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">WIRE FEEDS</span>
-        <button onclick="toggleDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
+        <button onclick="toggleWiresDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
     </div>
     <input type="text" id="drawer-search" placeholder="Search wires..." oninput="filterDrawer()" style="width:100%; padding:10px; margin-bottom:25px; border:1px solid #ddd; border-radius:6px; background:transparent; color:var(--text);">
     <div id="side-feed-columns">
@@ -289,7 +310,24 @@
         </div>
     </div>
 </div>
-<div id="drawer-tab" onclick="toggleDrawer()">EXTERNAL FEEDS</div>
+<div id="wires-tab" onclick="toggleWiresDrawer()">WIRES</div>
+
+<div id="audio-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">AUDIO LIBRARY</span>
+        <button onclick="toggleAudioDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
+    </div>
+    
+    <div id="mic-panel-btn" class="audio-mic-lg" onclick="toggleRecording()">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <span style="font-size:0.8rem; font-weight:bold; opacity:0.7;" id="mic-label">Click to Record</span>
+    </div>
+
+    <div class="section-label">SAVED RECORDINGS</div>
+    <div id="audio-list" class="audio-list">
+        </div>
+</div>
+<div id="audio-tab" onclick="toggleAudioDrawer()">AUDIO</div>
 
 <div id="right-drawer">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -368,7 +406,7 @@
                         <button class="header-tool-btn" onclick="triggerImport()" title="Import Backup">
                             <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
                         </button>
-                        <button class="header-tool-btn" id="mic-btn" onclick="toggleRecording()" title="Quick Quote">
+                        <button class="header-tool-btn" id="quick-quote-btn" onclick="toggleRecording(true)" title="Quick Quote (Download Only)">
                             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                         </button>
                         <button class="header-tool-btn" onclick="toggleDarkMode()" title="Toggle Theme">
@@ -459,6 +497,19 @@
     let audioChunks = [];
     let recordingMimeType = 'audio/webm';
     let recordingExtension = 'webm';
+    let isQuickQuote = false; // Distinguish between sidebar mic and panel mic
+    
+    // INDEXEDDB SETUP
+    let db;
+    const dbRequest = indexedDB.open("NewsroomAudioDB", 1);
+    dbRequest.onupgradeneeded = (event) => {
+        const d = event.target.result;
+        d.createObjectStore("recordings", { keyPath: "id" });
+    };
+    dbRequest.onsuccess = (event) => {
+        db = event.target.result;
+        loadRecordings();
+    };
 
     const todayObj = new Date();
     let currentWeekStart = new Date();
@@ -523,12 +574,20 @@
         return '';
     }
 
-    async function toggleRecording() {
-        const btn = document.getElementById('mic-btn');
+    async function toggleRecording(quickMode = false) {
+        isQuickQuote = quickMode;
+        const quickBtn = document.getElementById('quick-quote-btn');
+        const panelBtn = document.getElementById('mic-panel-btn');
+        const panelLabel = document.getElementById('mic-label');
         
+        // Check state
         if (mediaRecorder && mediaRecorder.state === "recording") {
             mediaRecorder.stop();
-            btn.classList.remove('recording-active');
+            if(quickBtn) quickBtn.classList.remove('recording-active');
+            if(panelBtn) {
+                panelBtn.classList.remove('recording');
+                panelLabel.innerText = "Click to Record";
+            }
         } else {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -538,33 +597,48 @@
                 mediaRecorder = new MediaRecorder(stream, options);
                 recordingMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
                 
-                if (recordingMimeType.includes('mp4') || recordingMimeType.includes('aac')) {
-                    recordingExtension = 'mp4';
-                } else if (recordingMimeType.includes('ogg')) {
-                    recordingExtension = 'ogg';
-                } else {
-                    recordingExtension = 'webm';
-                }
+                if (recordingMimeType.includes('mp4') || recordingMimeType.includes('aac')) recordingExtension = 'mp4';
+                else if (recordingMimeType.includes('ogg')) recordingExtension = 'ogg';
+                else recordingExtension = 'webm';
 
                 audioChunks = [];
                 mediaRecorder.ondataavailable = event => { if (event.data.size > 0) audioChunks.push(event.data); };
 
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: recordingMimeType });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audio = document.getElementById('audio-playback');
-                    const downloadLink = document.getElementById('download-link');
-                    
-                    audio.src = audioUrl;
-                    downloadLink.href = audioUrl;
-                    downloadLink.download = `QuickQuote_${new Date().toISOString().slice(0,19).replace(/:/g,"-")}.${recordingExtension}`;
-                    
-                    document.getElementById('audioModal').style.display = 'flex';
                     stream.getTracks().forEach(track => track.stop());
+
+                    if (isQuickQuote) {
+                        // Quick Quote Behavior: Modal & Download
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = document.getElementById('audio-playback');
+                        const downloadLink = document.getElementById('download-link');
+                        audio.src = audioUrl;
+                        downloadLink.href = audioUrl;
+                        downloadLink.download = `QuickQuote_${Date.now()}.${recordingExtension}`;
+                        document.getElementById('audioModal').style.display = 'flex';
+                    } else {
+                        // Library Behavior: Save to DB
+                        const transaction = db.transaction(["recordings"], "readwrite");
+                        const store = transaction.objectStore("recordings");
+                        const newItem = {
+                            id: Date.now(),
+                            blob: audioBlob,
+                            date: new Date().toISOString(),
+                            ext: recordingExtension
+                        };
+                        store.add(newItem);
+                        transaction.oncomplete = () => loadRecordings();
+                    }
                 };
 
                 mediaRecorder.start();
-                btn.classList.add('recording-active');
+                if(isQuickQuote && quickBtn) {
+                    quickBtn.classList.add('recording-active');
+                } else if (!isQuickQuote && panelBtn) {
+                    panelBtn.classList.add('recording');
+                    panelLabel.innerText = "Recording... (Click to Stop)";
+                }
             } catch (err) {
                 alert("Microphone access denied. Check your browser permissions.");
                 console.error(err);
@@ -573,6 +647,53 @@
     }
 
     function downloadAudio() { document.getElementById('download-link').click(); }
+
+    function loadRecordings() {
+        if (!db) return;
+        const transaction = db.transaction(["recordings"], "readonly");
+        const store = transaction.objectStore("recordings");
+        const request = store.getAll();
+        
+        request.onsuccess = (event) => {
+            const recordings = event.target.result.sort((a,b) => b.id - a.id);
+            const container = document.getElementById('audio-list');
+            
+            if (recordings.length === 0) {
+                container.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px; font-size:0.8rem;">No recordings yet.</div>';
+                return;
+            }
+
+            container.innerHTML = recordings.map(rec => {
+                const dateObj = new Date(rec.date);
+                const dateStr = dateObj.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'});
+                const timeStr = dateObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                const url = URL.createObjectURL(rec.blob);
+                
+                return `
+                <div class="audio-item">
+                    <div class="audio-header">
+                        <div class="audio-meta">
+                            <span class="audio-date">${dateStr}</span>
+                            <span class="audio-time">${timeStr}</span>
+                        </div>
+                    </div>
+                    <audio class="audio-player" controls src="${url}"></audio>
+                    <div class="audio-actions">
+                        <a href="${url}" download="Recording_${rec.id}.${rec.ext}" class="audio-action-btn">Download</a>
+                        <button onclick="deleteRecording(${rec.id})" class="audio-btn audio-del">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+    }
+
+    function deleteRecording(id) {
+        if (!confirm("Delete this recording?")) return;
+        const transaction = db.transaction(["recordings"], "readwrite");
+        const store = transaction.objectStore("recordings");
+        store.delete(id);
+        transaction.oncomplete = () => loadRecordings();
+    }
 
     // RSS WITH PROXY
     async function fetchRSS(url) {
@@ -615,10 +736,22 @@
         document.getElementById('col-3-content').innerHTML = build(scienceDailyData) || "No entries.";
     }
 
-    // OUTLOOK DRAWER LOGIC
+    // DRAWER LOGIC
+    function toggleWiresDrawer() {
+        document.getElementById('wires-drawer').classList.toggle('open');
+        document.getElementById('audio-drawer').classList.remove('open');
+    }
+    function toggleAudioDrawer() {
+        document.getElementById('audio-drawer').classList.toggle('open');
+        document.getElementById('wires-drawer').classList.remove('open');
+    }
     function toggleOutlookDrawer() {
         document.getElementById('outlook-drawer').classList.toggle('open');
         document.getElementById('right-drawer').classList.remove('open');
+    }
+    function toggleRightDrawer() { 
+        document.getElementById('right-drawer').classList.toggle('open'); 
+        document.getElementById('outlook-drawer').classList.remove('open');
     }
     
     function renderOutlook() {
@@ -770,55 +903,12 @@
         }, 550);
     }
     
-    function runGlobalSearch() {
-        const term = document.getElementById('global-search-input').value.toLowerCase();
-        const resBox = document.getElementById('search-results');
-        if(!term) return resBox.innerHTML = "";
-        let html = "";
-        
-        notes.forEach(n => { 
-            if(n.title.toLowerCase().includes(term) || n.content.toLowerCase().includes(term)) {
-                html += `
-                <div class="search-item" onclick="switchNote(${n.id})">
-                    <span class="type-tag ${n.filed?'tag-archive':'tag-note'}">${n.filed?'ARCHIVE':'STORY'}</span>
-                    <span class="search-title">${n.title || 'Untitled'}</span>
-                </div>`; 
-            }
-        });
-        
-        events.forEach(e => { 
-            if(e.details.toLowerCase().includes(term) || (e.location && e.location.toLowerCase().includes(term))) {
-                html += `
-                <div class="search-item" onclick="selectDay('${e.date}')">
-                    <span class="type-tag tag-event">EVENT</span>
-                    <span class="search-title">${e.details}</span>
-                    <span class="search-meta">${new Date(e.date).toLocaleDateString([],{month:'short',day:'numeric'})}</span>
-                </div>`; 
-            }
-        });
-
-        sortItems.forEach(s => {
-            if(s.toLowerCase().includes(term)) {
-                html += `
-                <div class="search-item">
-                    <span class="type-tag tag-task">TASK</span>
-                    <span class="search-title">${s}</span>
-                </div>`;
-            }
-        });
-        
-        resBox.innerHTML = html || "<div style='font-size:0.7rem; opacity:0.5; padding:5px;'>No matches found.</div>";
-    }
-
     // ZEN MODE
     function toggleZenMode() {
         document.body.classList.toggle('zen-mode');
-        document.getElementById('side-drawer').classList.remove('open');
+        document.getElementById('wires-drawer').classList.remove('open');
+        document.getElementById('audio-drawer').classList.remove('open');
         document.getElementById('right-drawer').classList.remove('open');
-        document.getElementById('outlook-drawer').classList.remove('open');
-    }
-    function toggleRightDrawer() { 
-        document.getElementById('right-drawer').classList.toggle('open'); 
         document.getElementById('outlook-drawer').classList.remove('open');
     }
     document.addEventListener('keydown', function(event) {
@@ -831,8 +921,6 @@
     function triggerImport() { document.getElementById('import-input').click(); }
     function importWorkspace(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const d = JSON.parse(e.target.result); notes = d.notes; events = d.events; sortItems = d.tasks; document.getElementById('quick-scraps').value = d.scraps || ""; activeId = notes.find(n => !n.filed)?.id || notes[0].id; save(); renderWeek(); renderSort(); renderOutlook(); }; reader.readAsText(file); }
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-    function toggleDrawer() { document.getElementById('side-drawer').classList.toggle('open'); }
-    function toggleRightDrawer() { document.getElementById('right-drawer').classList.toggle('open'); }
     function toggleFiled() { const l = document.getElementById('filed-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
     function updateTime() { 
         const n = new Date(); 
@@ -845,7 +933,6 @@
         document.getElementById('date-display').innerText = n.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'}); 
         let h = n.getHours(), g = "Evening"; if(h<12) g="Morning"; else if(h<17) g="Afternoon"; document.getElementById('greeting').innerText = `Good ${g}, Thomas`; 
         
-        // Analog Clock Flash Logic
         const sec = n.getSeconds();
         const min = n.getMinutes();
         const analogClock = document.getElementById('clock-analog');
@@ -857,6 +944,34 @@
         renderAgenda(); 
     }
     function fileAndEmail() { const n = notes.find(x => x.id === activeId); if(!n) return; const btn = document.getElementById('email-btn'); btn.innerText = "Sending..."; document.getElementById('hidden-title').value = n.title; document.getElementById('hidden-message').value = n.content; document.getElementById('hidden-time').value = new Date().toLocaleString(); emailjs.sendForm('service_i7fjjgg', 'template_591ycw8', document.getElementById('email-bridge-form')).then(() => { btn.innerHTML = 'Sent <svg class="success-tick" viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>'; setTimeout(() => { fileNote(); btn.innerText = "File & Email"; }, 1500); }); }
+
+    // Run Global Search
+    function runGlobalSearch() {
+        const term = document.getElementById('global-search-input').value.toLowerCase();
+        const resBox = document.getElementById('search-results');
+        if(!term) return resBox.innerHTML = "";
+        let html = "";
+        
+        notes.forEach(n => { 
+            if(n.title.toLowerCase().includes(term) || n.content.toLowerCase().includes(term)) {
+                html += `<div class="search-item" onclick="switchNote(${n.id})"><span class="type-tag ${n.filed?'tag-archive':'tag-note'}">${n.filed?'ARCHIVE':'STORY'}</span><span class="search-title">${n.title || 'Untitled'}</span></div>`; 
+            }
+        });
+        
+        events.forEach(e => { 
+            if(e.details.toLowerCase().includes(term) || (e.location && e.location.toLowerCase().includes(term))) {
+                html += `<div class="search-item" onclick="selectDay('${e.date}')"><span class="type-tag tag-event">EVENT</span><span class="search-title">${e.details}</span><span class="search-meta">${new Date(e.date).toLocaleDateString([],{month:'short',day:'numeric'})}</span></div>`; 
+            }
+        });
+
+        sortItems.forEach(s => {
+            if(s.toLowerCase().includes(term)) {
+                html += `<div class="search-item"><span class="type-tag tag-task">TASK</span><span class="search-title">${s}</span></div>`;
+            }
+        });
+        
+        resBox.innerHTML = html || "<div style='font-size:0.7rem; opacity:0.5; padding:5px;'>No matches found.</div>";
+    }
 
     document.getElementById('quick-scraps').value = localStorage.getItem('newsroom-scraps') || "";
     document.getElementById('quick-scraps').addEventListener('input', e => localStorage.setItem('newsroom-scraps', e.target.value));
