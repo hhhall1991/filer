@@ -49,14 +49,39 @@
         
         /* --- HEADER --- */
         header { padding: 15px 40px; display: flex; align-items: center; gap: 30px; height: 90px; }
+        
+        /* Mobile Header Controls */
+        .mobile-controls-left, .mobile-controls-right { display: none; gap: 15px; }
+        .mob-btn { background: none; border: none; cursor: pointer; color: var(--text); opacity: 0.6; padding: 5px; }
+        .mob-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .mob-btn:hover { opacity: 1; color: var(--accent); }
+
         .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
         
-        /* Digital Clock */
-        #clock-digital { font-size: 2.8rem; font-weight: 200; color: #222; letter-spacing: -1px; white-space: nowrap; transition: color 0.4s ease; display: block; }
-        body.dark-mode #clock-digital { color: #fff; }
+        /* --- DIGITAL CLOCK STYLING --- */
+        #clock-digital { display: none; align-items: baseline; line-height: 1; } /* Hidden by default */
+        
+        #clock-hm { 
+            font-size: 2.8rem; 
+            font-weight: 200; 
+            color: #222; 
+            letter-spacing: -1px; 
+            transition: color 0.4s ease; 
+        }
+        
+        #clock-s { 
+            font-size: 1.1rem; /* Smaller seconds */
+            font-weight: 300; 
+            color: #888; /* Greyed out */
+            margin-left: 6px; 
+            opacity: 0.8;
+        }
 
-        /* Analog Clock */
-        #clock-analog { width: 50px; height: 50px; display: none; }
+        body.dark-mode #clock-hm { color: #fff; }
+        body.dark-mode #clock-s { color: #aaa; }
+
+        /* --- ANALOG CLOCK STYLING --- */
+        #clock-analog { width: 50px; height: 50px; display: block; } /* Visible by default */
         .clock-face { fill: none; stroke: var(--text); stroke-width: 2.5; }
         .clock-hand { stroke: var(--text); stroke-linecap: round; }
         .hand-hour { stroke-width: 3.5; }
@@ -107,12 +132,16 @@
         #audio-tab { position: fixed; left: 0; top: 58%; transform: translateY(-50%); background: #7f8c8d; color: white; padding: 15px 6px; border-radius: 0 8px 8px 0; cursor: pointer; z-index: 999; writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.7rem; font-weight: bold; letter-spacing: 1px; transition: left 0.3s; }
 
         /* Audio Panel Styles */
-        .audio-mic-lg { width: 100%; background: rgba(0,0,0,0.05); border: 2px dashed var(--border-muted); border-radius: 12px; padding: 20px; margin-bottom: 20px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        .audio-mic-lg { width: 100%; background: rgba(0,0,0,0.05); border: 2px dashed var(--border-muted); border-radius: 12px; padding: 20px; margin-bottom: 20px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; }
         .audio-mic-lg:hover { background: rgba(0,0,0,0.1); border-color: var(--accent); }
         .audio-mic-lg svg { width: 32px; height: 32px; fill: var(--text); opacity: 0.6; }
         .audio-mic-lg.recording { background: #ffebee; border-color: #ff4444; animation: pulse-red-border 1.5s infinite; color: #ff4444; }
         .audio-mic-lg.recording svg { fill: #ff4444; opacity: 1; }
         @keyframes pulse-red-border { 0% { border-color: #ff4444; } 50% { border-color: transparent; } 100% { border-color: #ff4444; } }
+
+        /* Flag Button (Hidden unless recording) */
+        #mic-flag-btn { display: none; background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-top: 10px; z-index: 10; cursor: pointer; }
+        .audio-mic-lg.recording #mic-flag-btn { display: inline-block; }
 
         .audio-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
         .audio-item { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border-muted); }
@@ -121,10 +150,16 @@
         .audio-date { font-size: 0.75rem; font-weight: bold; color: var(--accent); }
         .audio-time { font-size: 0.65rem; opacity: 0.6; }
         .audio-player { width: 100%; height: 30px; }
-        .audio-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+        .audio-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+        .audio-download-del { display: flex; gap: 8px; }
         .audio-action-btn { background: none; border: none; font-size: 0.7rem; cursor: pointer; opacity: 0.6; }
         .audio-action-btn:hover { opacity: 1; text-decoration: underline; }
         .audio-del { color: #ff4444; }
+        
+        .bookmark-list { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+        .bookmark-chip { background: var(--post-it); color: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; gap: 4px; }
+        .bookmark-chip:hover { transform: scale(1.05); }
+        .bookmark-icon { color: var(--off-text); font-weight: bold; }
 
         /* --- RIGHT DRAWER 1 (SCRATCHPAD & CALCULATOR) --- */
         #right-drawer { position: fixed; right: -360px; top: 0; width: 360px; height: 100%; background: var(--paper); z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 15px rgba(0,0,0,0.1); padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
@@ -299,22 +334,27 @@
 
         /* --- MOBILE / IPHONE RESPONSIVENESS --- */
         @media (max-width: 768px) {
-            body { 
-                height: auto; 
-                overflow-y: auto; 
-                overflow-x: hidden;
-            }
-
+            body { height: auto; overflow-y: auto; overflow-x: hidden; }
+            
+            /* Header Re-do for Mobile */
             header { 
                 padding: 10px 15px; 
                 height: auto; 
-                flex-direction: column; 
-                gap: 15px; 
+                flex-direction: row; 
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px; 
             }
             
-            .clock-wrapper { width: 100%; justify-content: center; }
+            /* Show Mobile Controls */
+            .mobile-controls-left, .mobile-controls-right { display: flex; align-items: center; }
+            
+            /* Hide Desktop Side Tabs */
+            #wires-tab, #audio-tab, #right-drawer-tab, #outlook-tab { display: none; }
+
+            .clock-wrapper { flex-grow: 0; justify-content: center; margin: 0 10px; }
             #clock-digital { font-size: 2.2rem; }
-            .ticker-wrap { width: 100%; border-radius: 8px; }
+            .ticker-wrap { width: 100%; border-radius: 8px; order: 3; } /* Ticker is row 2 */
 
             /* Stack Sidebar FIRST, Editor SECOND */
             main { 
@@ -325,12 +365,7 @@
                 height: auto;
             }
 
-            .card { 
-                width: 100%; 
-                height: auto; 
-                min-height: 600px; 
-                overflow: visible;
-            }
+            .card { width: 100%; height: auto; min-height: 600px; overflow: visible; }
 
             /* SLIDE DOWN DRAWERS */
             #wires-drawer, #audio-drawer, #right-drawer, #outlook-drawer {
@@ -349,14 +384,6 @@
             #wires-drawer.open, #audio-drawer.open, 
             #right-drawer.open, #outlook-drawer.open {
                 top: 0;
-            }
-            
-            /* Smaller Tabs */
-            #wires-tab, #audio-tab, 
-            #right-drawer-tab, #outlook-tab {
-                padding: 10px 4px;
-                font-size: 0.6rem;
-                width: 25px;
             }
 
             /* Fix Modals */
@@ -403,6 +430,7 @@
     <div id="mic-panel-btn" class="audio-mic-lg" onclick="toggleRecording()">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 2.34 9 4v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         <span style="font-size:0.8rem; font-weight:bold; opacity:0.7;" id="mic-label">Click to Record</span>
+        <button id="mic-flag-btn" onclick="addBookmark(event)">⚑ Flag</button>
     </div>
 
     <div class="section-label">SAVED RECORDINGS</div>
@@ -442,8 +470,19 @@
 <div id="outlook-tab" onclick="toggleOutlookDrawer()">UPCOMING</div>
 
 <header>
+    <div class="mobile-controls-left">
+        <button class="mob-btn" onclick="toggleWiresDrawer()" title="Wires">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        </button>
+        <button class="mob-btn" onclick="toggleAudioDrawer()" title="Audio">
+            <svg viewBox="0 0 24 24"><path d="M12 3v9.28a4.39 4.39 0 0 0-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+        </button>
+    </div>
+
     <div class="clock-wrapper" onclick="toggleClockMode()">
-        <span id="clock-digital">00:00:00</span>
+        <div id="clock-digital">
+            <span id="clock-hm">00:00</span><span id="clock-s">00</span>
+        </div>
         <svg id="clock-analog" class="clock-face" viewBox="0 0 100 100">
             <circle class="clock-face" cx="50" cy="50" r="48" />
             <circle class="clock-center" cx="50" cy="50" r="2" />
@@ -452,6 +491,16 @@
             <line id="sec-hand" class="clock-hand hand-sec" x1="50" y1="50" x2="50" y2="10" />
         </svg>
     </div>
+
+    <div class="mobile-controls-right">
+        <button class="mob-btn" onclick="toggleRightDrawer()" title="Scratchpad">
+            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+        <button class="mob-btn" onclick="toggleOutlookDrawer()" title="Upcoming">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+        </button>
+    </div>
+
     <div class="ticker-wrap"><div class="ticker" id="ticker-feed">Loading...</div></div>
 </header>
 
@@ -573,20 +622,24 @@
     let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false}];
     let activeId = notes.find(n => !n.filed)?.id || notes[0].id;
     let editingEventId = null;
-    let clockMode = 'digital'; 
+    let clockMode = 'analog'; // DEFAULT TO ANALOG
     let animationFrameId = null;
     let mediaRecorder;
     let audioChunks = [];
     let recordingMimeType = 'audio/webm';
     let recordingExtension = 'webm';
-    let isQuickQuote = false; // Distinguish between sidebar mic and panel mic
+    let isQuickQuote = false; 
+    let currentBookmarks = [];
+    let recordingStartTime = 0;
     
     // INDEXEDDB SETUP
     let db;
-    const dbRequest = indexedDB.open("NewsroomAudioDB", 1);
+    const dbRequest = indexedDB.open("NewsroomAudioDB", 2); // Version 2 for bookmarks
     dbRequest.onupgradeneeded = (event) => {
         const d = event.target.result;
-        d.createObjectStore("recordings", { keyPath: "id" });
+        if (!d.objectStoreNames.contains("recordings")) {
+            d.createObjectStore("recordings", { keyPath: "id" });
+        }
     };
     dbRequest.onsuccess = (event) => {
         db = event.target.result;
@@ -621,7 +674,7 @@
             document.getElementById('clock-analog').style.display = 'block';
             animateClock();
         } else {
-            document.getElementById('clock-digital').style.display = 'block';
+            document.getElementById('clock-digital').style.display = 'flex';
             document.getElementById('clock-analog').style.display = 'none';
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         }
@@ -647,7 +700,7 @@
         animationFrameId = requestAnimationFrame(animateClock);
     }
 
-    // AUDIO RECORDER
+    // AUDIO RECORDER & BOOKMARKING
     function getSupportedMimeType() {
         const types = ['audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg'];
         for (const type of types) {
@@ -683,6 +736,9 @@
                 else recordingExtension = 'webm';
 
                 audioChunks = [];
+                currentBookmarks = []; // Reset bookmarks
+                recordingStartTime = Date.now();
+
                 mediaRecorder.ondataavailable = event => { if (event.data.size > 0) audioChunks.push(event.data); };
 
                 mediaRecorder.onstop = () => {
@@ -704,7 +760,8 @@
                             id: Date.now(),
                             blob: audioBlob,
                             date: new Date().toISOString(),
-                            ext: recordingExtension
+                            ext: recordingExtension,
+                            bookmarks: currentBookmarks
                         };
                         store.add(newItem);
                         transaction.oncomplete = () => loadRecordings();
@@ -722,6 +779,19 @@
                 alert("Microphone access denied. Check your browser permissions.");
                 console.error(err);
             }
+        }
+    }
+
+    function addBookmark(e) {
+        e.stopPropagation(); // Prevent stopping recording
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            const elapsed = (Date.now() - recordingStartTime) / 1000;
+            currentBookmarks.push(elapsed);
+            // Visual feedback
+            const btn = document.getElementById('mic-flag-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Saved!";
+            setTimeout(() => btn.innerText = originalText, 1000);
         }
     }
 
@@ -748,6 +818,19 @@
                 const timeStr = dateObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 const url = URL.createObjectURL(rec.blob);
                 
+                // Bookmarks HTML
+                let bookmarksHtml = "";
+                if(rec.bookmarks && rec.bookmarks.length > 0) {
+                    bookmarksHtml = `<div class="bookmark-list">` + 
+                        rec.bookmarks.map(time => {
+                            const mins = Math.floor(time / 60);
+                            const secs = Math.floor(time % 60).toString().padStart(2, '0');
+                            return `<div class="bookmark-chip" onclick="playFromTime('${url}', ${time}, this)">
+                                <span class="bookmark-icon">⚑</span> ${mins}:${secs}
+                            </div>`;
+                        }).join('') + `</div>`;
+                }
+
                 return `
                 <div class="audio-item">
                     <div class="audio-header">
@@ -757,14 +840,27 @@
                         </div>
                     </div>
                     <audio class="audio-player" controls src="${url}"></audio>
+                    ${bookmarksHtml}
                     <div class="audio-actions">
-                        <a href="${url}" download="Recording_${rec.id}.${rec.ext}" class="audio-action-btn">Download</a>
-                        <button onclick="deleteRecording(${rec.id})" class="audio-btn audio-del">Delete</button>
+                        <div class="audio-download-del">
+                            <a href="${url}" download="Recording_${rec.id}.${rec.ext}" class="audio-action-btn">Download</a>
+                            <button onclick="deleteRecording(${rec.id})" class="audio-btn audio-del">Delete</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
         };
     }
+
+    // Helper to play from specific time (needs a bit of DOM trickery as players are dynamic)
+    window.playFromTime = function(srcUrl, time, el) {
+        // Find the sibling audio element
+        const player = el.parentElement.parentElement.querySelector('audio');
+        if(player) {
+            player.currentTime = time;
+            player.play();
+        }
+    };
 
     function deleteRecording(id) {
         if (!confirm("Delete this recording?")) return;
@@ -907,11 +1003,9 @@
                 let displayTime = e.time;
 
                 if (diffMs > 0) {
-                    // Future: Amber if < 60 mins
                     if (diffMins <= 60 && diffMins > 15) { statusClass = 'status-amber'; }
                     else if (diffMins <= 15) { statusClass = 'status-green'; }
                 } else {
-                    // Past/Present
                     const elapsedMins = Math.abs(diffMins);
                     if (elapsedMins <= 120) { 
                         statusClass = 'status-active'; 
@@ -1007,10 +1101,19 @@
         const n = new Date(); 
         const display = document.getElementById('clock-digital');
         if(clockMode === 'digital') {
-            display.style.display = 'block';
+            display.style.display = 'flex';
             document.getElementById('clock-analog').style.display = 'none';
-            display.innerText = n.toLocaleTimeString([], {hour12:false});
-        } 
+            // Custom Digital Format
+            const hrs = n.getHours().toString().padStart(2, '0');
+            const mins = n.getMinutes().toString().padStart(2, '0');
+            const secs = n.getSeconds().toString().padStart(2, '0');
+            document.getElementById('clock-hm').innerText = `${hrs}:${mins}`;
+            document.getElementById('clock-s').innerText = secs;
+        } else {
+            display.style.display = 'none';
+            document.getElementById('clock-analog').style.display = 'block';
+            animateClock();
+        }
         document.getElementById('date-display').innerText = n.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'}); 
         let h = n.getHours(), g = "Evening"; if(h<12) g="Morning"; else if(h<17) g="Afternoon"; document.getElementById('greeting').innerText = `Good ${g}, Thomas`; 
         
@@ -1061,6 +1164,9 @@
     document.getElementById('story-editor').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) n.content = e.target.value; updateWordCount(); });
 
     setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook();
+    
+    // Start animation loop
+    animationFrameId = requestAnimationFrame(animateClock);
 </script>
 </body>
 </html>
