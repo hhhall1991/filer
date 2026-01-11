@@ -71,7 +71,7 @@
             50% { opacity: 1; }
             75% { opacity: 0.1; }
         }
-        .clock-flash { animation: flash-twice 1s ease-in-out; }
+        .clock-flash { animation: flash-twice 1.5s ease-in-out; }
 
         /* --- TICKER --- */
         .ticker-wrap { flex-grow: 1; overflow: hidden; background: rgba(255, 255, 255, 0.3); border-radius: 50px; padding: 10px 0; white-space: nowrap; display: flex; align-items: center; }
@@ -457,6 +457,8 @@
     let animationFrameId = null;
     let mediaRecorder;
     let audioChunks = [];
+    let recordingMimeType = 'audio/webm';
+    let recordingExtension = 'webm';
 
     const todayObj = new Date();
     let currentWeekStart = new Date();
@@ -501,7 +503,6 @@
         const min = now.getMinutes();
         const hr = now.getHours();
         
-        // Smooth rotation calculations
         const secDeg = (sec + ms / 1000) * 6;
         const minDeg = (min + sec / 60) * 6;
         const hrDeg = (hr % 12 + min / 60) * 30;
@@ -514,6 +515,14 @@
     }
 
     // AUDIO RECORDER
+    function getSupportedMimeType() {
+        const types = ['audio/webm', 'audio/mp4', 'audio/aac', 'audio/ogg'];
+        for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) return type;
+        }
+        return '';
+    }
+
     async function toggleRecording() {
         const btn = document.getElementById('mic-btn');
         
@@ -523,38 +532,47 @@
         } else {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
+                const mimeType = getSupportedMimeType();
+                const options = mimeType ? { mimeType } : {};
                 
-                mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
-                };
+                mediaRecorder = new MediaRecorder(stream, options);
+                recordingMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
+                
+                if (recordingMimeType.includes('mp4') || recordingMimeType.includes('aac')) {
+                    recordingExtension = 'mp4';
+                } else if (recordingMimeType.includes('ogg')) {
+                    recordingExtension = 'ogg';
+                } else {
+                    recordingExtension = 'webm';
+                }
+
+                audioChunks = [];
+                mediaRecorder.ondataavailable = event => { if (event.data.size > 0) audioChunks.push(event.data); };
 
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioBlob = new Blob(audioChunks, { type: recordingMimeType });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     const audio = document.getElementById('audio-playback');
                     const downloadLink = document.getElementById('download-link');
                     
                     audio.src = audioUrl;
                     downloadLink.href = audioUrl;
-                    downloadLink.download = `QuickQuote_${new Date().toISOString().slice(0,19).replace(/:/g,"-")}.webm`;
+                    downloadLink.download = `QuickQuote_${new Date().toISOString().slice(0,19).replace(/:/g,"-")}.${recordingExtension}`;
                     
                     document.getElementById('audioModal').style.display = 'flex';
+                    stream.getTracks().forEach(track => track.stop());
                 };
 
                 mediaRecorder.start();
                 btn.classList.add('recording-active');
             } catch (err) {
-                alert("Microphone access denied or not supported in this context (try localhost or https).");
+                alert("Microphone access denied. Check your browser permissions.");
                 console.error(err);
             }
         }
     }
 
-    function downloadAudio() {
-        document.getElementById('download-link').click();
-    }
+    function downloadAudio() { document.getElementById('download-link').click(); }
 
     // RSS WITH PROXY
     async function fetchRSS(url) {
@@ -677,10 +695,9 @@
                 let displayTime = e.time;
 
                 if (diffMs > 0) {
-                    // Future: Amber if < 60 mins
-                    if (diffMins <= 60) { statusClass = 'status-amber'; }
+                    if (diffMins <= 60 && diffMins > 15) { statusClass = 'status-amber'; }
+                    else if (diffMins <= 15) { statusClass = 'status-green'; }
                 } else {
-                    // Past/Present
                     const elapsedMins = Math.abs(diffMins);
                     if (elapsedMins <= 120) { 
                         statusClass = 'status-active'; 
