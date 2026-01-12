@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Personal Newsroom Dashboard</title>
+    <title>Copy Filing Dashboard</title>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
@@ -28,6 +28,7 @@
             --off-text: #b71c1c;
             --post-it: #fff9c4;
             --sky-blue: #add8e6;
+            --purple-memo: #9c27b0;
             --border-muted: rgba(0,0,0,0.08);
             --transition: all 0.2s ease-in-out;
             --icon-btn-color: #4a4a4a;
@@ -40,6 +41,7 @@
             --tab-inactive: #2d2d2d;
             --post-it: #444433;
             --accent: #a68b6a;
+            --purple-memo: #ce93d8;
             --border-muted: rgba(255,255,255,0.1);
             --icon-btn-color: #e0e0e0;
         }
@@ -66,22 +68,21 @@
         .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
         /* Mobile Header Controls */
-        .mobile-controls-left, .mobile-controls-right { display: none; } /* Hidden on desktop */
+        .mobile-controls-left, .mobile-controls-right { display: none; }
         .mob-btn { 
             background: none; 
             border: none; 
             cursor: pointer; 
             color: var(--text); 
             opacity: 0.7; 
-            padding: 8px; /* Larger touch target */
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            -webkit-appearance: none; /* iOS Fix */
+            -webkit-appearance: none;
         }
         .mob-btn svg { width: 24px; height: 24px; fill: currentColor; display: block; }
         
-        /* Hover fix for touch devices */
         @media (hover: hover) {
             .mob-btn:hover { opacity: 1; color: var(--accent); }
         }
@@ -163,7 +164,6 @@
         .audio-mic-lg.recording svg { fill: #ff4444; opacity: 1; }
         @keyframes pulse-red-border { 0% { border-color: #ff4444; } 50% { border-color: transparent; } 100% { border-color: #ff4444; } }
 
-        /* Flag Button */
         #mic-flag-btn { display: none; background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-top: 10px; z-index: 10; cursor: pointer; }
         .audio-mic-lg.recording #mic-flag-btn { display: inline-block; }
 
@@ -191,7 +191,6 @@
         .outlook-item { font-size: 0.8rem; margin-bottom: 6px; padding: 6px; background: rgba(0,0,0,0.03); border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid transparent; transition: all 0.2s; position: relative; }
         body.dark-mode .outlook-item { background: rgba(255,255,255,0.05); }
         
-        /* Outlook Status Colors */
         .outlook-item.status-amber { background-color: #fff8e1 !important; border-left-color: #ffb300 !important; }
         body.dark-mode .outlook-item.status-amber { background-color: rgba(255, 179, 0, 0.15) !important; color: #ffe082; }
         
@@ -210,11 +209,68 @@
         @media (hover: hover) { .outlook-btn:hover { opacity: 1 !important; transform: scale(1.1); } }
         .outlook-del { color: #ff4444; }
 
-        /* --- SCRATCHPAD --- */
-        #quick-scraps { width: 100%; flex-grow: 1; padding: 15px; border: none; background: transparent; font-size: 0.95rem; resize: none; color: var(--text); font-family: inherit; outline: none; line-height: 1.6; border-bottom: 1px solid var(--border-muted); margin-bottom: 20px; }
+        /* --- SCRATCHPAD & EDITOR (RICH TEXT) --- */
+        .rich-editor {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text);
+            font-family: inherit;
+            resize: none;
+            white-space: pre-wrap;
+        }
+        .rich-editor:empty:before { content: attr(data-placeholder); color: #888; pointer-events: none; display: block; }
+        
+        #quick-scraps { 
+            flex-grow: 1; 
+            padding: 10px 5px; 
+            font-size: 0.95rem; 
+            line-height: 1.6; 
+            border-bottom: 1px solid var(--border-muted); 
+            margin-bottom: 20px; 
+            min-height: 200px;
+        }
+
+        /* --- FIXED STORY EDITOR SCROLL --- */
+        #story-editor { 
+            flex-grow: 1;         
+            height: auto;         
+            min-height: 0;        
+            overflow-y: auto;     
+            font-size: 1.2rem; 
+            line-height: 1.7; 
+            transition: font-size 0.3s; 
+        }
+
+        .format-toolbar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .format-toolbar:hover { opacity: 1; }
+        
+        .fmt-btn {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-family: serif;
+            font-size: 14px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fmt-btn:hover { background: rgba(0,0,0,0.1); color: var(--accent); }
+        body.dark-mode .fmt-btn { background: rgba(255,255,255,0.1); }
 
         /* --- MATH WIDGET --- */
-        .math-widget { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 8px; margin-top: auto; border: 1px solid var(--border-muted); }
+        .math-widget { background: rgba(0,0,0,0.03); padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-muted); }
         body.dark-mode .math-widget { background: rgba(255,255,255,0.05); }
         .math-row { display: flex; gap: 8px; margin-bottom: 8px; }
         .math-input { width: 50%; padding: 8px; border: 1px solid var(--border-muted); border-radius: 4px; font-size: 0.75rem; background: var(--paper); color: var(--text); }
@@ -253,21 +309,22 @@
         @media (hover: hover) { .header-tool-btn:hover { opacity: 1; color: var(--accent); transform: scale(1.1); } }
         .header-tool-btn svg { width: 16px; height: 16px; fill: currentColor; }
         
-        /* Recording Animation */
         .recording-active { color: #ff4444 !important; opacity: 1 !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
         /* --- SEARCH & ARCHIVE --- */
-        .search-item, .filed-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
-        @media (hover: hover) { .search-item:hover, .filed-item:hover { background: rgba(0,0,0,0.03); } }
-        @media (hover: hover) { body.dark-mode .search-item:hover, body.dark-mode .filed-item:hover { background: rgba(255,255,255,0.05); } }
-        .filed-item { justify-content: space-between; }
+        .search-item, .filed-item, .memo-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
+        @media (hover: hover) { .search-item:hover, .filed-item:hover, .memo-item:hover { background: rgba(0,0,0,0.03); } }
+        @media (hover: hover) { body.dark-mode .search-item:hover, body.dark-mode .filed-item:hover, body.dark-mode .memo-item:hover { background: rgba(255,255,255,0.05); } }
+        .filed-item, .memo-item { justify-content: space-between; }
         
         .type-tag { font-size: 0.55rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; font-weight: 800; color: #fff; flex-shrink: 0; min-width: 55px; text-align: center; letter-spacing: 0.5px; }
         .tag-note { background: var(--accent); }
         .tag-archive { background: #7f8c8d; }
+        .tag-memo { background: var(--purple-memo); }
         .tag-event { background: var(--work-text); }
         .tag-task { background: #e67e22; }
+        .tag-later { background: #95a5a6; } /* Grey for Non-Urgent */
         .search-title { flex-grow: 1; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         .search-meta { font-size: 0.65rem; opacity: 0.5; margin-left: auto; white-space: nowrap; }
 
@@ -283,28 +340,25 @@
         body.dark-mode .event-item { background: rgba(255,255,255,0.05); }
         .event-tools { position: absolute; right: 5px; top: 5px; opacity: 0; transition: 0.2s; background: var(--paper); padding: 2px 5px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; }
         @media (hover: hover) { .event-item:hover .event-tools { opacity: 1; } }
-        /* On touch, always show event tools if needed or handle differently. For now, rely on tap. */
         .event-tools button { border: none; background: none; cursor: pointer; font-size: 0.75rem; color: var(--icon-btn-color); margin-left: 5px; }
         .event-tools button.delete-btn { color: #ff4444; }
-
-        /* Event Status Colors */
+        
         .event-item.status-amber { background-color: #fff8e1 !important; border-left-color: #ffb300 !important; }
         body.dark-mode .event-item.status-amber { background-color: rgba(255, 179, 0, 0.15) !important; color: #ffe082; }
-        
         .event-item.status-green { background-color: var(--work-green) !important; border-left-color: var(--work-text) !important; color: var(--work-text) !important; }
         body.dark-mode .event-item.status-green { background-color: rgba(46, 125, 50, 0.25) !important; color: #81c784 !important; }
-        
         .event-item.status-active { background-color: var(--work-green) !important; border-left-color: var(--work-text) !important; color: var(--work-text) !important; }
         body.dark-mode .event-item.status-active { background-color: rgba(46, 125, 50, 0.35) !important; color: #81c784 !important; }
-        
         .event-item.status-past { background-color: rgba(0,0,0,0.02) !important; opacity: 0.5; border-left-color: #ccc !important; }
         body.dark-mode .event-item.status-past { background-color: rgba(255,255,255,0.02) !important; border-left-color: #444 !important; }
-
-        /* Static Active Dot */
         .active-dot { height: 8px; width: 8px; background-color: var(--work-text); border-radius: 50%; position: absolute; right: 8px; bottom: 8px; }
 
         /* --- TASKS --- */
-        #sort-list { max-height: 150px; overflow-y: auto; padding-right: 4px; }
+        #sort-list { 
+            /* REMOVED MAX-HEIGHT to extend down */
+            overflow-y: visible; 
+            padding-right: 4px; 
+        }
         .sort-item { background: var(--post-it); padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .sort-item.completed { animation: satisfy-complete 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; pointer-events: none; }
         @keyframes satisfy-complete {
@@ -313,16 +367,20 @@
             100% { background-color: #4CAF50; color: white; transform: scale(0.8); opacity: 0; max-height: 0; margin: 0; padding: 0; }
         }
 
+        /* Non Urgent List */
+        #nu-list { margin-top: 10px; max-height: 200px; overflow-y: auto; }
+
         /* --- EDITOR --- */
         .tabs-wrapper { display: flex; align-items: center; gap: 5px; border-bottom: 1px solid var(--border-muted); overflow-x: auto; min-height: 40px; }
         .tab { background: var(--tab-inactive); padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85rem; white-space: nowrap; }
         .tab.active { background: var(--paper); font-weight: 600; }
         #catchline-input { border: none; outline: none; background: transparent; font-size: 1.4rem; font-weight: 700; border-bottom: 1px solid var(--border-muted); margin-bottom: 15px; width: 100%; color: var(--text); padding: 5px 0; transition: font-size 0.3s, text-align 0.3s; }
-        #story-editor { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-size: 1.2rem; line-height: 1.7; resize: none; color: var(--text); font-family: inherit; transition: font-size 0.3s; }
-        .editor-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-muted); }
         
-        .file-btn, .email-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
+        .editor-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-muted); margin-top: auto; flex-shrink: 0; }
+        
+        .file-btn, .memo-btn, .email-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
         .file-btn { background: var(--accent); color: white; }
+        .memo-btn { background: var(--purple-memo); color: white; }
         .email-btn { background: #4a4a4a; color: white; }
         .delete-story-btn { background: transparent; color: var(--off-text); border: 1px solid var(--off-text); }
         @media (hover: hover) { .delete-story-btn:hover { background: var(--off-red); } }
@@ -477,9 +535,16 @@
         <span style="font-weight:bold; font-size:1rem; letter-spacing:1px;">SCRATCHPAD</span>
         <button onclick="toggleRightDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
     </div>
-    <textarea id="quick-scraps" placeholder="Jot down quotes, numbers, ideas..."></textarea>
     
-    <div class="section-label">% CHANGE CALCULATOR</div>
+    <div class="format-toolbar">
+        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('bold');" title="Bold"><b>B</b></button>
+        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('italic');" title="Italic"><i>I</i></button>
+        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('underline');" title="Underline"><u>U</u></button>
+    </div>
+
+    <div id="quick-scraps" class="rich-editor" contenteditable="true" data-placeholder="Jot down quotes, numbers, ideas..."></div>
+    
+    <div class="section-label" style="margin-top:20px;">% CHANGE CALCULATOR</div>
     <div class="math-widget">
         <div class="math-row">
             <input type="number" id="calc-old" class="math-input" placeholder="Old Num" oninput="calculateMath()">
@@ -498,6 +563,9 @@
         <button onclick="toggleOutlookDrawer()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:var(--text); font-size:1.2rem;">✕</button>
     </div>
     <div id="outlook-content"></div>
+
+    <div class="section-label" style="margin-top:20px;">NON-URGENT TO DO</div>
+    <div id="nu-list"></div>
 </div>
 
 <header>
@@ -553,16 +621,24 @@
 <main>
     <section class="card">
         <div class="tabs-wrapper" id="tab-bar"></div>
-        <div style="display:flex; flex-direction:column; height:100%; padding-top:15px;">
+        <div style="display:flex; flex-direction:column; flex:1; min-height:0; padding-top:15px;">
             <input type="text" id="catchline-input" placeholder="Catchline...">
-            <textarea id="story-editor" placeholder="Start typing..."></textarea>
+            <div id="story-editor" class="rich-editor" contenteditable="true" data-placeholder="Start typing..."></div>
             <div class="editor-footer">
-                <div style="display:flex; gap:10px; align-items:center;">
+                <div style="display:flex; gap:15px; align-items:center;">
                     <button class="zen-btn" onclick="toggleZenMode()">Zen Mode</button>
+                    
+                    <div class="format-toolbar" style="margin-bottom:0; border-right:1px solid #ddd; padding-right:10px;">
+                        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('bold');" title="Bold"><b>B</b></button>
+                        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('italic');" title="Italic"><i>I</i></button>
+                        <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('underline');" title="Underline"><u>U</u></button>
+                    </div>
+
                     <div id="word-count" style="font-size:0.7rem; font-weight:bold; color:#888;">WORDS: 0</div>
                 </div>
                 <div class="footer-buttons">
                     <button class="delete-story-btn" onclick="deleteActiveNote()">Delete</button>
+                    <button class="memo-btn" onclick="fileMemo()">File As Memo</button>
                     <button class="email-btn" id="email-btn" onclick="fileAndEmail()">File & Email</button>
                     <button class="file-btn" onclick="fileNote()">File Story</button>
                 </div>
@@ -621,6 +697,14 @@
                     </div>
                     <div id="filed-list" style="display:none; margin-top:5px;"></div>
                 </div>
+
+                <div class="sidebar-section" style="border:none; margin-top:20px;">
+                    <div class="section-label" onclick="toggleMemos()" style="display:flex; justify-content:space-between;">
+                        <span>MEMOS <span id="memo-count" style="opacity:0.7;">(0)</span></span>
+                        <span style="font-size:0.6rem;">▼</span>
+                    </div>
+                    <div id="memo-list" style="display:none; margin-top:5px;"></div>
+                </div>
             </div>
         </div>
         
@@ -664,8 +748,9 @@
     let findTenderData = [], scienceDailyData = [];
     let events = JSON.parse(localStorage.getItem('newsroom-events-final')) || [];
     let sortItems = JSON.parse(localStorage.getItem('newsroom-sort-final')) || [];
-    let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false}];
-    let activeId = notes.find(n => !n.filed)?.id || notes[0].id;
+    let nonUrgentItems = JSON.parse(localStorage.getItem('newsroom-nu-final')) || [];
+    let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false, isMemo:false}];
+    let activeId = notes.find(n => !n.filed && !n.isMemo)?.id || notes[0].id;
     let editingEventId = null;
     let clockMode = 'analog'; 
     let animationFrameId = null;
@@ -696,6 +781,12 @@
     const offset = todayObj.getDay() === 0 ? 6 : todayObj.getDay() - 1;
     currentWeekStart.setDate(todayObj.getDate() - offset); currentWeekStart.setHours(0,0,0,0);
     let selectedDate = new Date(); selectedDate.setHours(0,0,0,0);
+
+    // FORMATTING FUNCTION
+    function formatText(command) {
+        document.execCommand(command, false, null);
+        document.getElementById('story-editor').focus();
+    }
 
     // MATH WIDGET LOGIC
     function calculateMath() {
@@ -1115,33 +1206,116 @@
     function editEvent(id) { const ev = events.find(e => e.id === id); editingEventId = id; document.getElementById('modal-heading').innerText = "Update Event"; document.getElementById('event-date').value = ev.date; document.getElementById('event-time').value = ev.time; document.getElementById('event-location').value = ev.location; document.getElementById('event-details').value = ev.details; document.getElementById('eventModal').style.display = 'flex'; }
     function deleteEvent(id) { if(confirm("Remove entry?")) { events = events.filter(e => e.id !== id); localStorage.setItem('newsroom-events-final', JSON.stringify(events)); renderWeek(); renderOutlook(); } }
 
-    // STORY
-    function deleteActiveNote() { if(confirm("Delete current story?")) { notes = notes.filter(n => n.id !== activeId); if(!notes.some(n => !n.filed)) createNewNote(); else activeId = notes.find(n => !n.filed).id; save(); } }
-    function save() { localStorage.setItem('newsroom-notes-final', JSON.stringify(notes)); const active = notes.find(n => n.id === activeId); document.getElementById('story-editor').value = active?.content || ""; document.getElementById('catchline-input').value = active?.title || ""; renderTabs(); updateWordCount(); }
-    function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false}; notes.push(n); activeId = n.id; save(); }
-    function switchNote(id) { activeId = id; save(); }
-    function fileNote() { const n = notes.find(x => x.id === activeId); if(n) { n.filed = true; const next = notes.find(x => !x.filed); activeId = next ? next.id : null; if(!activeId) createNewNote(); save(); } }
-    function renderTabs() {
-        const active = notes.filter(n => !n.filed);
-        document.getElementById('tab-bar').innerHTML = active.map(n => `<div class="tab ${n.id === activeId ? 'active' : ''}" onclick="switchNote(${n.id})">${n.title || 'Draft'}</div>`).join('') + '<button onclick="createNewNote()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1.4rem;padding:0 10px;">+</button>';
-        const filed = notes.filter(n => n.filed); document.getElementById('filed-count').innerText = `(${filed.length})`;
-        document.getElementById('filed-list').innerHTML = filed.map(n => `<div class="filed-item"><span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled'}</span><button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button></div>`).join('');
+    // STORY & MEMO LOGIC
+    function deleteActiveNote() { if(confirm("Delete current story?")) { notes = notes.filter(n => n.id !== activeId); if(!notes.some(n => !n.filed && !n.isMemo)) createNewNote(); else activeId = notes.find(n => !n.filed && !n.isMemo).id; save(); } }
+    
+    // UPDATED SAVE: Uses innerHTML for Rich Text
+    function save() { 
+        localStorage.setItem('newsroom-notes-final', JSON.stringify(notes)); 
+        const active = notes.find(n => n.id === activeId); 
+        document.getElementById('story-editor').innerHTML = active?.content || ""; 
+        document.getElementById('catchline-input').value = active?.title || ""; 
+        renderTabs(); 
+        updateWordCount(); 
     }
-    function unfileNote(id) { const n = notes.find(x => x.id === id); if(n) { n.filed = false; activeId = id; save(); } }
+    
+    function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false, isMemo:false}; notes.push(n); activeId = n.id; save(); }
+    function switchNote(id) { activeId = id; save(); }
+    
+    // FILE STORIES
+    function fileNote() { 
+        const n = notes.find(x => x.id === activeId); 
+        if(n) { 
+            n.filed = true; 
+            n.isMemo = false; // Ensure it's not a memo anymore
+            const next = notes.find(x => !x.filed && !x.isMemo); 
+            activeId = next ? next.id : null; 
+            if(!activeId) createNewNote(); 
+            save(); 
+        } 
+    }
+    
+    // FILE MEMOS
+    function fileMemo() {
+        const n = notes.find(x => x.id === activeId);
+        if(n) {
+            n.isMemo = true; // Mark as Memo
+            n.filed = false; // Ensure not archived
+            const next = notes.find(x => !x.filed && !x.isMemo);
+            activeId = next ? next.id : null;
+            if(!activeId) createNewNote();
+            save();
+        }
+    }
+
+    // UPDATED TABS: Logic for Active, Filed, and Memos
+    function renderTabs() {
+        const active = notes.filter(n => !n.filed && !n.isMemo);
+        
+        // Render Active Tabs
+        document.getElementById('tab-bar').innerHTML = active.map(n => 
+            `<div class="tab ${n.id === activeId ? 'active' : ''}" onclick="switchNote(${n.id})">${n.title || 'Draft'}</div>`
+        ).join('') + '<button onclick="createNewNote()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1.4rem;padding:0 10px;">+</button>';
+        
+        // Render Filed List
+        const filed = notes.filter(n => n.filed).reverse();
+        document.getElementById('filed-count').innerText = `(${filed.length})`;
+        document.getElementById('filed-list').innerHTML = filed.map(n => 
+            `<div class="filed-item">
+                <span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled'}</span>
+                <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
+            </div>`
+        ).join('');
+
+        // Render Memo List
+        const memos = notes.filter(n => !n.filed && n.isMemo).reverse();
+        document.getElementById('memo-count').innerText = `(${memos.length})`;
+        document.getElementById('memo-list').innerHTML = memos.map(n => 
+            `<div class="memo-item">
+                <span onclick="openMemo(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled Memo'}</span>
+                <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
+            </div>`
+        ).join('');
+    }
+    
+    function unfileNote(id) { const n = notes.find(x => x.id === id); if(n) { n.filed = false; n.isMemo = false; activeId = id; save(); } }
+    
+    // RE-OPEN MEMO (Moves back to active tabs)
+    function openMemo(id) { 
+        const n = notes.find(x => x.id === id); 
+        if(n) { 
+            n.isMemo = false; // Not a memo anymore (Active)
+            n.filed = false; 
+            activeId = id; 
+            save(); 
+        } 
+    }
+
     function permDeleteNote(id) { if(confirm("Permanent removal?")) { notes = notes.filter(n => n.id !== id); save(); } }
 
-    // UTILS & SEARCH
-    function updateWordCount() { const text = document.getElementById('story-editor').value; const count = text.trim() ? text.trim().split(/\s+/).length : 0; document.getElementById('word-count').innerText = `WORDS: ${count}`; }
+    // UTILS & SEARCH (Updated for Rich Text)
+    function updateWordCount() { 
+        const editor = document.getElementById('story-editor');
+        const text = editor.innerText || ""; // Use innerText to ignore HTML tags
+        const count = text.trim() ? text.trim().split(/\s+/).length : 0; 
+        document.getElementById('word-count').innerText = `WORDS: ${count}`; 
+    }
     
-    // TASK LOGIC
+    // TASK LOGIC - MAIN LIST & NON-URGENT LIST
     function addSortItem() { const i = document.getElementById('sort-input'); if(i.value) { sortItems.push(i.value); i.value = ""; localStorage.setItem('newsroom-sort-final', JSON.stringify(sortItems)); renderSort(); } }
+    
     function renderSort() { 
         document.getElementById('sort-list').innerHTML = sortItems.map((s, idx) => `
         <div class="sort-item">
             <span>${s}</span>
-            <button onclick="completeTask(this, ${idx})" style="background:#4CAF50; border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px;">✓</button>
+            <div style="display:flex; gap:5px;">
+                <button onclick="completeTask(this, ${idx})" style="background:#4CAF50; border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center;">✓</button>
+                <button onclick="kickTask(${idx})" style="background:var(--accent); border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center;" title="Kick to Non-Urgent">➞</button>
+            </div>
         </div>`).join(''); 
+        renderNonUrgent();
     }
+    
     function completeTask(btn, idx) {
         const item = btn.closest('.sort-item');
         item.classList.add('completed');
@@ -1150,6 +1324,50 @@
             localStorage.setItem('newsroom-sort-final', JSON.stringify(sortItems));
             renderSort();
         }, 550);
+    }
+
+    function kickTask(idx) {
+        nonUrgentItems.push(sortItems[idx]);
+        sortItems.splice(idx, 1);
+        updateTaskStorage();
+    }
+
+    function renderNonUrgent() {
+        const container = document.getElementById('nu-list');
+        if(nonUrgentItems.length === 0) {
+            container.innerHTML = "<div style='opacity:0.5; font-size:0.7rem; font-style:italic; padding:5px;'>Grass is empty.</div>";
+            return;
+        }
+        container.innerHTML = nonUrgentItems.map((s, idx) => `
+        <div class="sort-item">
+            <span>${s}</span>
+            <div style="display:flex; gap:5px;">
+                <button onclick="restoreTask(${idx})" style="background:var(--text); border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center;" title="Restore">←</button>
+                <button onclick="completeNonUrgent(this, ${idx})" style="background:#4CAF50; border:none; color:white; border-radius:50%; width:16px; height:16px; cursor:pointer; font-size:10px; display:flex; align-items:center; justify-content:center;">✓</button>
+            </div>
+        </div>`).join(''); 
+    }
+
+    function restoreTask(idx) {
+        sortItems.push(nonUrgentItems[idx]);
+        nonUrgentItems.splice(idx, 1);
+        updateTaskStorage();
+    }
+
+    function completeNonUrgent(btn, idx) {
+        const item = btn.closest('.sort-item');
+        item.classList.add('completed');
+        setTimeout(() => {
+            nonUrgentItems.splice(idx, 1);
+            updateTaskStorage();
+        }, 550);
+    }
+
+    function updateTaskStorage() {
+        localStorage.setItem('newsroom-sort-final', JSON.stringify(sortItems));
+        localStorage.setItem('newsroom-nu-final', JSON.stringify(nonUrgentItems));
+        renderSort();
+        renderNonUrgent();
     }
     
     // ZEN MODE
@@ -1166,11 +1384,14 @@
         }
     });
 
-    function exportWorkspace() { const data = { notes, events, tasks: sortItems, scraps: document.getElementById('quick-scraps').value }; const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Newsroom-Backup.json`; a.click(); }
+    function exportWorkspace() { const data = { notes, events, tasks: sortItems, nonUrgent: nonUrgentItems, scraps: document.getElementById('quick-scraps').innerHTML }; const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Newsroom-Backup.json`; a.click(); }
     function triggerImport() { document.getElementById('import-input').click(); }
-    function importWorkspace(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const d = JSON.parse(e.target.result); notes = d.notes; events = d.events; sortItems = d.tasks; document.getElementById('quick-scraps').value = d.scraps || ""; activeId = notes.find(n => !n.filed)?.id || notes[0].id; save(); renderWeek(); renderSort(); renderOutlook(); }; reader.readAsText(file); }
+    function importWorkspace(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const d = JSON.parse(e.target.result); notes = d.notes; events = d.events; sortItems = d.tasks; nonUrgentItems = d.nonUrgent || []; document.getElementById('quick-scraps').innerHTML = d.scraps || ""; activeId = notes.find(n => !n.filed && !n.isMemo)?.id || notes[0].id; save(); renderWeek(); renderSort(); renderOutlook(); }; reader.readAsText(file); }
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    
     function toggleFiled() { const l = document.getElementById('filed-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
+    function toggleMemos() { const l = document.getElementById('memo-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
+
     function updateTime() { 
         const n = new Date(); 
         const display = document.getElementById('clock-digital');
@@ -1202,7 +1423,7 @@
 
         renderAgenda(); 
     }
-    function fileAndEmail() { const n = notes.find(x => x.id === activeId); if(!n) return; const btn = document.getElementById('email-btn'); btn.innerText = "Sending..."; document.getElementById('hidden-title').value = n.title; document.getElementById('hidden-message').value = n.content; document.getElementById('hidden-time').value = new Date().toLocaleString(); emailjs.sendForm('service_i7fjjgg', 'template_591ycw8', document.getElementById('email-bridge-form')).then(() => { btn.innerHTML = 'Sent <svg class="success-tick" viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>'; setTimeout(() => { fileNote(); btn.innerText = "File & Email"; }, 1500); }); }
+    function fileAndEmail() { const n = notes.find(x => x.id === activeId); if(!n) return; const btn = document.getElementById('email-btn'); btn.innerText = "Sending..."; document.getElementById('hidden-title').value = n.title; document.getElementById('hidden-message').value = document.getElementById('story-editor').innerText; document.getElementById('hidden-time').value = new Date().toLocaleString(); emailjs.sendForm('service_i7fjjgg', 'template_591ycw8', document.getElementById('email-bridge-form')).then(() => { btn.innerHTML = 'Sent <svg class="success-tick" viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>'; setTimeout(() => { fileNote(); btn.innerText = "File & Email"; }, 1500); }); }
 
     // Run Global Search
     function runGlobalSearch() {
@@ -1213,7 +1434,13 @@
         
         notes.forEach(n => { 
             if(n.title.toLowerCase().includes(term) || n.content.toLowerCase().includes(term)) {
-                html += `<div class="search-item" onclick="switchNote(${n.id})"><span class="type-tag ${n.filed?'tag-archive':'tag-note'}">${n.filed?'ARCHIVE':'STORY'}</span><span class="search-title">${n.title || 'Untitled'}</span></div>`; 
+                let tagClass = 'tag-note';
+                let tagText = 'STORY';
+                
+                if (n.filed) { tagClass = 'tag-archive'; tagText = 'ARCHIVE'; }
+                else if (n.isMemo) { tagClass = 'tag-memo'; tagText = 'MEMO'; }
+
+                html += `<div class="search-item" onclick="${n.isMemo ? `openMemo(${n.id})` : n.filed ? `unfileNote(${n.id})` : `switchNote(${n.id})`}"><span class="type-tag ${tagClass}">${tagText}</span><span class="search-title">${n.title || 'Untitled'}</span></div>`; 
             }
         });
         
@@ -1228,14 +1455,24 @@
                 html += `<div class="search-item"><span class="type-tag tag-task">TASK</span><span class="search-title">${s}</span></div>`;
             }
         });
+
+        nonUrgentItems.forEach(s => {
+             if(s.toLowerCase().includes(term)) {
+                html += `<div class="search-item"><span class="type-tag tag-later">LATER</span><span class="search-title">${s}</span></div>`;
+            }
+        });
         
         resBox.innerHTML = html || "<div style='font-size:0.7rem; opacity:0.5; padding:5px;'>No matches found.</div>";
     }
 
-    document.getElementById('quick-scraps').value = localStorage.getItem('newsroom-scraps') || "";
-    document.getElementById('quick-scraps').addEventListener('input', e => localStorage.setItem('newsroom-scraps', e.target.value));
+    // Scraps: Use innerHTML now
+    document.getElementById('quick-scraps').innerHTML = localStorage.getItem('newsroom-scraps') || "";
+    document.getElementById('quick-scraps').addEventListener('input', e => localStorage.setItem('newsroom-scraps', e.target.innerHTML));
+    
     document.getElementById('catchline-input').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) { n.title = e.target.value; renderTabs(); } });
-    document.getElementById('story-editor').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) n.content = e.target.value; updateWordCount(); });
+    
+    // Editor: Use innerHTML now
+    document.getElementById('story-editor').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) n.content = e.target.innerHTML; updateWordCount(); });
 
     setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook();
     
