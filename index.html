@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Copy Filing Dashboard</title>
+    <title>Personal Newsroom Dashboard</title>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
@@ -788,6 +788,47 @@
         document.getElementById('story-editor').focus();
     }
 
+    // CHECK SNIPPETS (Text Expander)
+    function checkSnippets() {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const node = sel.focusNode;
+        if (node.nodeType !== 3) return; // Only text nodes
+
+        const text = node.textContent;
+        const map = {
+            '/exc': 'EXCLUSIVE by THOMAS GODFREY',
+            '/dateline': 'EXCLUSIVE from THOMAS GODFREY in ',
+            '/reveal': 'The Sun can reveal'
+        };
+
+        for (let key in map) {
+            if (text.endsWith(key)) {
+                const replacement = map[key];
+                const newText = text.substring(0, text.length - key.length) + replacement;
+                
+                // 1. Update DOM
+                node.textContent = newText;
+
+                // 2. Restore Cursor
+                const range = document.createRange();
+                range.setStart(node, newText.length);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+                // 3. Update State Manually (without re-rendering)
+                const n = notes.find(x => x.id === activeId);
+                if(n) {
+                    n.content = document.getElementById('story-editor').innerHTML;
+                    localStorage.setItem('newsroom-notes-final', JSON.stringify(notes));
+                    updateWordCount();
+                }
+                return;
+            }
+        }
+    }
+
     // MATH WIDGET LOGIC
     function calculateMath() {
         const oldVal = parseFloat(document.getElementById('calc-old').value);
@@ -1392,6 +1433,12 @@
     function toggleFiled() { const l = document.getElementById('filed-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
     function toggleMemos() { const l = document.getElementById('memo-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
 
+    // AUTO NIGHT MODE ON LOAD
+    const now = new Date();
+    if(now.getHours() >= 19 || now.getHours() < 7) {
+        document.body.classList.add('dark-mode');
+    }
+
     function updateTime() { 
         const n = new Date(); 
         const display = document.getElementById('clock-digital');
@@ -1412,6 +1459,13 @@
         document.getElementById('date-display').innerText = n.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'}); 
         let h = n.getHours(), g = "Evening"; if(h<12) g="Morning"; else if(h<17) g="Afternoon"; document.getElementById('greeting').innerText = `Good ${g}, Thomas`; 
         
+        // Auto Dark Mode Trigger at exactly 19:00:00
+        if (n.getHours() === 19 && n.getMinutes() === 0 && n.getSeconds() === 0) {
+            if (!document.body.classList.contains('dark-mode')) {
+                document.body.classList.add('dark-mode');
+            }
+        }
+
         // Analog Clock Flash Logic
         const sec = n.getSeconds();
         const min = n.getMinutes();
@@ -1471,8 +1525,13 @@
     
     document.getElementById('catchline-input').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) { n.title = e.target.value; renderTabs(); } });
     
-    // Editor: Use innerHTML now
-    document.getElementById('story-editor').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) n.content = e.target.innerHTML; updateWordCount(); });
+    // Editor: Use innerHTML now, and check snippets
+    document.getElementById('story-editor').addEventListener('input', e => { 
+        const n = notes.find(x => x.id === activeId); 
+        if(n) n.content = e.target.innerHTML; 
+        updateWordCount(); 
+        checkSnippets();
+    });
 
     setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook();
     
