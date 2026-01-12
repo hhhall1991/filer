@@ -799,7 +799,7 @@
         const map = {
             '/exc': 'EXCLUSIVE by THOMAS GODFREY',
             '/dateline': 'EXCLUSIVE from THOMAS GODFREY in ',
-            '/reveal': ', The Sun can reveal.'
+            '/reveal': 'The Sun can reveal'
         };
 
         for (let key in map) {
@@ -1289,6 +1289,17 @@
         }
     }
 
+    // Helper: Format Date for List
+    function formatListDate(timestamp) {
+        const date = new Date(Number(timestamp));
+        const now = new Date();
+        if (date.toDateString() === now.toDateString()) {
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        } else {
+            return date.toLocaleDateString([], {month: 'short', day: 'numeric'});
+        }
+    }
+
     // UPDATED TABS: Logic for Active, Filed, and Memos
     function renderTabs() {
         const active = notes.filter(n => !n.filed && !n.isMemo);
@@ -1298,22 +1309,24 @@
             `<div class="tab ${n.id === activeId ? 'active' : ''}" onclick="switchNote(${n.id})">${n.title || 'Draft'}</div>`
         ).join('') + '<button onclick="createNewNote()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1.4rem;padding:0 10px;">+</button>';
         
-        // Render Filed List
+        // Render Filed List (With Date)
         const filed = notes.filter(n => n.filed).reverse();
         document.getElementById('filed-count').innerText = `(${filed.length})`;
         document.getElementById('filed-list').innerHTML = filed.map(n => 
             `<div class="filed-item">
-                <span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled'}</span>
+                <span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.title || 'Untitled'}</span>
+                <span style="font-size:0.65rem; opacity:0.5; margin-right:10px; flex-shrink:0;">${formatListDate(n.id)}</span>
                 <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
             </div>`
         ).join('');
 
-        // Render Memo List
+        // Render Memo List (With Date)
         const memos = notes.filter(n => !n.filed && n.isMemo).reverse();
         document.getElementById('memo-count').innerText = `(${memos.length})`;
         document.getElementById('memo-list').innerHTML = memos.map(n => 
             `<div class="memo-item">
-                <span onclick="openMemo(${n.id})" style="cursor:pointer; flex-grow:1;">${n.title || 'Untitled Memo'}</span>
+                <span onclick="openMemo(${n.id})" style="cursor:pointer; flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.title || 'Untitled Memo'}</span>
+                <span style="font-size:0.65rem; opacity:0.5; margin-right:10px; flex-shrink:0;">${formatListDate(n.id)}</span>
                 <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
             </div>`
         ).join('');
@@ -1523,12 +1536,22 @@
     document.getElementById('quick-scraps').innerHTML = localStorage.getItem('newsroom-scraps') || "";
     document.getElementById('quick-scraps').addEventListener('input', e => localStorage.setItem('newsroom-scraps', e.target.innerHTML));
     
-    document.getElementById('catchline-input').addEventListener('input', e => { const n = notes.find(x => x.id === activeId); if(n) { n.title = e.target.value; renderTabs(); } });
+    document.getElementById('catchline-input').addEventListener('input', e => { 
+        const n = notes.find(x => x.id === activeId); 
+        if(n) { 
+            n.title = e.target.value; 
+            localStorage.setItem('newsroom-notes-final', JSON.stringify(notes)); // Explicit save
+            renderTabs(); 
+        } 
+    });
     
-    // Editor: Use innerHTML now, and check snippets
+    // Editor: Use innerHTML now, and check snippets + Explicit Save
     document.getElementById('story-editor').addEventListener('input', e => { 
         const n = notes.find(x => x.id === activeId); 
-        if(n) n.content = e.target.innerHTML; 
+        if(n) {
+            n.content = e.target.innerHTML;
+            localStorage.setItem('newsroom-notes-final', JSON.stringify(notes)); // Explicit save
+        }
         updateWordCount(); 
         checkSnippets();
     });
@@ -1540,5 +1563,3 @@
 </script>
 </body>
 </html>
-
-
