@@ -29,6 +29,7 @@
             --post-it: #fff9c4;
             --sky-blue: #add8e6;
             --purple-memo: #9c27b0;
+            --spike-color: #5d4037; /* Dark Brown/Grey for Spike Tag */
             --border-muted: rgba(0,0,0,0.08);
             --transition: all 0.2s ease-in-out;
             --icon-btn-color: #4a4a4a;
@@ -42,6 +43,7 @@
             --post-it: #444433;
             --accent: #a68b6a;
             --purple-memo: #ce93d8;
+            --spike-color: #a1887f;
             --border-muted: rgba(255,255,255,0.1);
             --icon-btn-color: #e0e0e0;
         }
@@ -312,16 +314,17 @@
         .recording-active { color: #ff4444 !important; opacity: 1 !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        /* --- SEARCH & ARCHIVE --- */
-        .search-item, .filed-item, .memo-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
-        @media (hover: hover) { .search-item:hover, .filed-item:hover, .memo-item:hover { background: rgba(0,0,0,0.03); } }
-        @media (hover: hover) { body.dark-mode .search-item:hover, body.dark-mode .filed-item:hover, body.dark-mode .memo-item:hover { background: rgba(255,255,255,0.05); } }
-        .filed-item, .memo-item { justify-content: space-between; }
+        /* --- SEARCH & ARCHIVE & SPIKE --- */
+        .search-item, .filed-item, .memo-item, .spike-item { padding: 8px 10px; border-bottom: 1px solid var(--border-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; border-radius: 4px; }
+        @media (hover: hover) { .search-item:hover, .filed-item:hover, .memo-item:hover, .spike-item:hover { background: rgba(0,0,0,0.03); } }
+        @media (hover: hover) { body.dark-mode .search-item:hover, body.dark-mode .filed-item:hover, body.dark-mode .memo-item:hover, body.dark-mode .spike-item:hover { background: rgba(255,255,255,0.05); } }
+        .filed-item, .memo-item, .spike-item { justify-content: space-between; }
         
         .type-tag { font-size: 0.55rem; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; font-weight: 800; color: #fff; flex-shrink: 0; min-width: 55px; text-align: center; letter-spacing: 0.5px; }
         .tag-note { background: var(--accent); }
         .tag-archive { background: #7f8c8d; }
         .tag-memo { background: var(--purple-memo); }
+        .tag-spike { background: var(--spike-color); }
         .tag-event { background: var(--work-text); }
         .tag-task { background: #e67e22; }
         .tag-later { background: #95a5a6; } /* Grey for Non-Urgent */
@@ -392,8 +395,33 @@
         .success-tick path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: draw-tick 0.5s ease-out forwards; }
         @keyframes draw-tick { to { stroke-dashoffset: 0; } }
 
-        /* ZEN MODE */
-        body.zen-mode header { display: none; }
+        /* ZEN MODE UPDATES */
+        body.zen-mode header {
+            display: flex; /* Keep it visible */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            background: transparent; /* No background */
+            z-index: 2000;
+            pointer-events: none; /* Don't block clicks on underlying elements */
+            padding: 20px 40px; /* Match original padding */
+            justify-content: flex-start; /* Ensure clock is on left */
+        }
+
+        /* Hide everything in header EXCEPT clock */
+        body.zen-mode .desktop-controls,
+        body.zen-mode .mobile-controls-left,
+        body.zen-mode .mobile-controls-right,
+        body.zen-mode .ticker-wrap {
+            display: none !important;
+        }
+
+        body.zen-mode .clock-wrapper {
+            pointer-events: auto; /* Re-enable clicks for clock */
+        }
+        
         body.zen-mode #wires-drawer, body.zen-mode #audio-drawer, body.zen-mode #right-drawer, body.zen-mode #outlook-drawer { display: none; }
         body.zen-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
         body.zen-mode .card:last-child { display: none; }
@@ -544,6 +572,12 @@
 
     <div id="quick-scraps" class="rich-editor" contenteditable="true" data-placeholder="Jot down quotes, numbers, ideas..."></div>
     
+    <div class="section-label" onclick="toggleSpike()" style="margin-top:20px; cursor:pointer; display:flex; justify-content:space-between;">
+        <span>THE SPIKE <span id="spike-count" style="opacity:0.5;">(0)</span></span>
+        <span style="font-size:0.6rem;">▼</span>
+    </div>
+    <div id="spike-list" style="display:none; max-height:150px; overflow-y:auto; margin-bottom:15px;"></div>
+
     <div class="section-label" style="margin-top:20px;">% CHANGE CALCULATOR</div>
     <div class="math-widget">
         <div class="math-row">
@@ -749,8 +783,8 @@
     let events = JSON.parse(localStorage.getItem('newsroom-events-final')) || [];
     let sortItems = JSON.parse(localStorage.getItem('newsroom-sort-final')) || [];
     let nonUrgentItems = JSON.parse(localStorage.getItem('newsroom-nu-final')) || [];
-    let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false, isMemo:false}];
-    let activeId = notes.find(n => !n.filed && !n.isMemo)?.id || notes[0].id;
+    let notes = JSON.parse(localStorage.getItem('newsroom-notes-final')) || [{id:Date.now(), title:'', content:'', filed:false, isMemo:false, spiked:false}];
+    let activeId = notes.find(n => !n.filed && !n.isMemo && !n.spiked)?.id || notes[0].id;
     let editingEventId = null;
     let clockMode = 'analog'; 
     let animationFrameId = null;
@@ -799,7 +833,7 @@
         const map = {
             '/exc': 'EXCLUSIVE by THOMAS GODFREY',
             '/dateline': 'EXCLUSIVE from THOMAS GODFREY in ',
-            '/reveal': 'The Sun can reveal'
+            '/reveal': ', The Sun can reveal.'
         };
 
         for (let key in map) {
@@ -1258,9 +1292,10 @@
         document.getElementById('catchline-input').value = active?.title || ""; 
         renderTabs(); 
         updateWordCount(); 
+        renderSpike();
     }
     
-    function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false, isMemo:false}; notes.push(n); activeId = n.id; save(); }
+    function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false, isMemo:false, spiked:false}; notes.push(n); activeId = n.id; save(); }
     function switchNote(id) { activeId = id; save(); }
     
     // FILE STORIES
@@ -1268,8 +1303,9 @@
         const n = notes.find(x => x.id === activeId); 
         if(n) { 
             n.filed = true; 
-            n.isMemo = false; // Ensure it's not a memo anymore
-            const next = notes.find(x => !x.filed && !x.isMemo); 
+            n.isMemo = false; 
+            n.spiked = false;
+            const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked); 
             activeId = next ? next.id : null; 
             if(!activeId) createNewNote(); 
             save(); 
@@ -1280,11 +1316,41 @@
     function fileMemo() {
         const n = notes.find(x => x.id === activeId);
         if(n) {
-            n.isMemo = true; // Mark as Memo
-            n.filed = false; // Ensure not archived
-            const next = notes.find(x => !x.filed && !x.isMemo);
+            n.isMemo = true; 
+            n.filed = false; 
+            n.spiked = false;
+            const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked);
             activeId = next ? next.id : null;
             if(!activeId) createNewNote();
+            save();
+        }
+    }
+
+    // AUTO SPIKE LOGIC
+    function autoSpikeOldStories() {
+        const twoWeeksMs = 14 * 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        let changed = false;
+        
+        notes.forEach(n => {
+            if (!n.spiked && !n.filed && !n.isMemo) {
+                if (now - n.id > twoWeeksMs) {
+                    n.spiked = true;
+                    n.filed = false;
+                    n.isMemo = false;
+                    changed = true;
+                }
+            }
+        });
+        
+        if (changed) {
+            // Check if active note was spiked
+            const active = notes.find(n => n.id === activeId);
+            if (!active || active.spiked) {
+                const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked);
+                activeId = next ? next.id : null;
+                if(!activeId) createNewNote();
+            }
             save();
         }
     }
@@ -1300,9 +1366,49 @@
         }
     }
 
+    // RENDER SPIKE LIST
+    function renderSpike() {
+        const spiked = notes.filter(n => n.spiked).reverse();
+        document.getElementById('spike-count').innerText = `(${spiked.length})`;
+        document.getElementById('spike-list').innerHTML = spiked.map(n => 
+            `<div class="spike-item">
+                <span onclick="unspikeNote(${n.id})" style="cursor:pointer; flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.title || 'Untitled'}</span>
+                <span style="font-size:0.65rem; opacity:0.5; margin-right:10px; flex-shrink:0;">${formatListDate(n.id)}</span>
+                <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
+            </div>`
+        ).join('');
+    }
+
+    function toggleSpike() { const l = document.getElementById('spike-list'); l.style.display = l.style.display === 'none' ? 'block' : 'none'; }
+
+    // MANUAL SPIKE FUNCTION (From Archive)
+    function spikeNote(id) {
+        const n = notes.find(x => x.id === id);
+        if(n) {
+            n.spiked = true;
+            n.filed = false;
+            n.isMemo = false;
+            save(); // No activeId change needed as it's from archive
+        }
+    }
+
+    // RESTORE FROM SPIKE (Resets timestamp so it doesn't re-spike immediately)
+    function unspikeNote(id) { 
+        const n = notes.find(x => x.id === id); 
+        if(n) { 
+            n.spiked = false; 
+            n.filed = false; 
+            n.isMemo = false;
+            // Reset ID to NOW so it has fresh 2 weeks
+            n.id = Date.now(); 
+            activeId = n.id; 
+            save(); 
+        } 
+    }
+
     // UPDATED TABS: Logic for Active, Filed, and Memos
     function renderTabs() {
-        const active = notes.filter(n => !n.filed && !n.isMemo);
+        const active = notes.filter(n => !n.filed && !n.isMemo && !n.spiked);
         
         // Render Active Tabs
         document.getElementById('tab-bar').innerHTML = active.map(n => 
@@ -1316,7 +1422,7 @@
             `<div class="filed-item">
                 <span onclick="unfileNote(${n.id})" style="cursor:pointer; flex-grow:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.title || 'Untitled'}</span>
                 <span style="font-size:0.65rem; opacity:0.5; margin-right:10px; flex-shrink:0;">${formatListDate(n.id)}</span>
-                <button onclick="permDeleteNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer;">✕</button>
+                <button onclick="spikeNote(${n.id})" style="border:none; background:none; color:red; cursor:pointer; font-weight:bold;" title="Move to Spike">✕</button>
             </div>`
         ).join('');
 
@@ -1332,14 +1438,15 @@
         ).join('');
     }
     
-    function unfileNote(id) { const n = notes.find(x => x.id === id); if(n) { n.filed = false; n.isMemo = false; activeId = id; save(); } }
+    function unfileNote(id) { const n = notes.find(x => x.id === id); if(n) { n.filed = false; n.isMemo = false; n.spiked = false; activeId = id; save(); } }
     
     // RE-OPEN MEMO (Moves back to active tabs)
     function openMemo(id) { 
         const n = notes.find(x => x.id === id); 
         if(n) { 
-            n.isMemo = false; // Not a memo anymore (Active)
+            n.isMemo = false; 
             n.filed = false; 
+            n.spiked = false;
             activeId = id; 
             save(); 
         } 
@@ -1506,8 +1613,9 @@
                 
                 if (n.filed) { tagClass = 'tag-archive'; tagText = 'ARCHIVE'; }
                 else if (n.isMemo) { tagClass = 'tag-memo'; tagText = 'MEMO'; }
+                else if (n.spiked) { tagClass = 'tag-spike'; tagText = 'SPIKE'; }
 
-                html += `<div class="search-item" onclick="${n.isMemo ? `openMemo(${n.id})` : n.filed ? `unfileNote(${n.id})` : `switchNote(${n.id})`}"><span class="type-tag ${tagClass}">${tagText}</span><span class="search-title">${n.title || 'Untitled'}</span></div>`; 
+                html += `<div class="search-item" onclick="${n.spiked ? `unspikeNote(${n.id})` : n.isMemo ? `openMemo(${n.id})` : n.filed ? `unfileNote(${n.id})` : `switchNote(${n.id})`}"><span class="type-tag ${tagClass}">${tagText}</span><span class="search-title">${n.title || 'Untitled'}</span></div>`; 
             }
         });
         
@@ -1556,7 +1664,7 @@
         checkSnippets();
     });
 
-    setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook();
+    setInterval(updateTime, 1000); updateTime(); getFeeds(); setInterval(getFeeds, 600000); renderWeek(); renderSort(); save(); renderOutlook(); autoSpikeOldStories();
     
     // Start animation loop
     animationFrameId = requestAnimationFrame(animateClock);
