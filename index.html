@@ -94,17 +94,27 @@
 
         .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
         
-        /* Digital Clock - UPDATED FONT */
+   /* Digital Clock - Segoe UI Variable (Thin) */
         #clock-digital { display: none; align-items: baseline; line-height: 1; }
         #clock-hm { 
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* Cleaner Sans Serif */
+            /* Uses 'Display' variant if available for best large-text rendering */
+            font-family: 'Segoe UI Variable Display', 'Segoe UI Variable', 'Segoe UI', sans-serif;
             font-size: 2.8rem; 
-            font-weight: 400; /* Slightly bolder than before */
+            font-weight: 200; /* Thin weight */
             color: #222; 
-            letter-spacing: -0.5px; 
+            letter-spacing: -1px; 
             transition: color 0.4s ease; 
         }
-        #clock-s { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 1.1rem; font-weight: 400; color: #888; margin-left: 6px; opacity: 0.8; }
+        #clock-s { 
+            font-family: 'Segoe UI Variable Display', 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            font-size: 1.1rem; 
+            font-weight: 200; /* Thin weight */
+            color: #888; 
+            margin-left: 6px; 
+            opacity: 0.8; 
+        }
+        
+        /* Dark Mode Overrides for Clock */
         body.dark-mode #clock-hm { color: #fff; }
         body.dark-mode #clock-s { color: #aaa; }
 
@@ -1786,3 +1796,4 @@
 </script>
 </body>
 </html>
+
