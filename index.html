@@ -763,7 +763,6 @@
 
 <script>
     let findTenderData = [], scienceDailyData = [];
-    let fileUndoTimer = null;
     let events = JSON.parse(localStorage.getItem('newsroom-events-final')) || [];
     let sortItems = JSON.parse(localStorage.getItem('newsroom-sort-final')) || [];
     let nonUrgentItems = JSON.parse(localStorage.getItem('newsroom-nu-final')) || [];
@@ -1282,45 +1281,18 @@
     function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false, isMemo:false, spiked:false}; notes.push(n); activeId = n.id; save(); }
     function switchNote(id) { activeId = id; save(); }
     
-    // FILE STORIES (With 10s Undo)
+    // FILE STORIES (Undo Removed - Immediate Action)
     function fileNote() {
-        const btn = document.getElementById('file-btn');
-        const noteIdToProcess = activeId; // Capture current ID immediately
-
-        // 1. If timer is running, this click is an UNDO
-        if (fileUndoTimer) {
-            clearTimeout(fileUndoTimer);
-            fileUndoTimer = null;
-            btn.innerText = "File Story";
-            btn.style.background = ""; // Reset color
-            return;
+        const n = notes.find(x => x.id === activeId);
+        if(n) {
+            n.filed = true;
+            n.isMemo = false;
+            n.spiked = false;
+            const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked);
+            activeId = next ? next.id : null;
+            if(!activeId) createNewNote();
+            save();
         }
-
-        // 2. Start the Timer
-        btn.innerText = "Undo (10s)";
-        btn.style.background = "#e67e22"; // Turn Orange
-
-        fileUndoTimer = setTimeout(() => {
-            // 3. Execute Original Logic
-            const n = notes.find(x => x.id === noteIdToProcess);
-            if (n) {
-                n.filed = true;
-                n.isMemo = false;
-                n.spiked = false;
-                
-                // Find next note
-                const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked);
-                activeId = next ? next.id : null;
-                if (!activeId) createNewNote();
-                
-                save();
-                
-                // Reset Button
-                btn.innerText = "File Story";
-                btn.style.background = "";
-                fileUndoTimer = null;
-            }
-        }, 10000); // 10 Seconds
     }
     
     // FILE MEMOS
