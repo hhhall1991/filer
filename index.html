@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Personal Newsroom Dashboard</title>
     
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-        (function() {
-            emailjs.init({
-              publicKey: "RbeVUo-zoi6r99uGH",
-            });
-        })();
-    </script>
-
     <style>
         :root {
             --beige-bg: #f5f5dc;
@@ -236,10 +227,10 @@
 
         /* --- FIXED STORY EDITOR SCROLL --- */
         #story-editor { 
-            flex-grow: 1;         
-            height: auto;         
-            min-height: 0;        
-            overflow-y: auto;     
+            flex-grow: 1;           
+            height: auto;           
+            min-height: 0;          
+            overflow-y: auto;       
             font-size: 1.2rem; 
             line-height: 1.7; 
             transition: font-size 0.3s; 
@@ -381,10 +372,9 @@
         
         .editor-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-muted); margin-top: auto; flex-shrink: 0; }
         
-        .file-btn, .memo-btn, .email-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
+        .file-btn, .memo-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
         .file-btn { background: var(--accent); color: white; }
         .memo-btn { background: var(--purple-memo); color: white; }
-        .email-btn { background: #4a4a4a; color: white; }
         .delete-story-btn { background: transparent; color: var(--off-text); border: 1px solid var(--off-text); }
         @media (hover: hover) { .delete-story-btn:hover { background: var(--off-red); } }
         .zen-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
@@ -673,8 +663,7 @@
                 <div class="footer-buttons">
                     <button class="delete-story-btn" onclick="deleteActiveNote()">Delete</button>
                     <button class="memo-btn" onclick="fileMemo()">File As Memo</button>
-                    <button class="email-btn" id="email-btn" onclick="fileAndEmail()">File & Email</button>
-                    <button class="file-btn" onclick="fileNote()">File Story</button>
+                    <button class="file-btn" id="file-btn" onclick="fileNote()">File Story</button>
                 </div>
             </div>
         </div>
@@ -772,14 +761,9 @@
     </div>
 </div>
 
-<form id="email-bridge-form" style="display:none;">
-    <input type="hidden" name="title" id="hidden-title">
-    <textarea name="message" id="hidden-message"></textarea>
-    <input type="hidden" name="time" id="hidden-time">
-</form>
-
 <script>
     let findTenderData = [], scienceDailyData = [];
+    let fileUndoTimer = null;
     let events = JSON.parse(localStorage.getItem('newsroom-events-final')) || [];
     let sortItems = JSON.parse(localStorage.getItem('newsroom-sort-final')) || [];
     let nonUrgentItems = JSON.parse(localStorage.getItem('newsroom-nu-final')) || [];
@@ -1298,18 +1282,45 @@
     function createNewNote() { const n = {id:Date.now(), title:'', content:'', filed:false, isMemo:false, spiked:false}; notes.push(n); activeId = n.id; save(); }
     function switchNote(id) { activeId = id; save(); }
     
-    // FILE STORIES
-    function fileNote() { 
-        const n = notes.find(x => x.id === activeId); 
-        if(n) { 
-            n.filed = true; 
-            n.isMemo = false; 
-            n.spiked = false;
-            const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked); 
-            activeId = next ? next.id : null; 
-            if(!activeId) createNewNote(); 
-            save(); 
-        } 
+    // FILE STORIES (With 10s Undo)
+    function fileNote() {
+        const btn = document.getElementById('file-btn');
+        const noteIdToProcess = activeId; // Capture current ID immediately
+
+        // 1. If timer is running, this click is an UNDO
+        if (fileUndoTimer) {
+            clearTimeout(fileUndoTimer);
+            fileUndoTimer = null;
+            btn.innerText = "File Story";
+            btn.style.background = ""; // Reset color
+            return;
+        }
+
+        // 2. Start the Timer
+        btn.innerText = "Undo (10s)";
+        btn.style.background = "#e67e22"; // Turn Orange
+
+        fileUndoTimer = setTimeout(() => {
+            // 3. Execute Original Logic
+            const n = notes.find(x => x.id === noteIdToProcess);
+            if (n) {
+                n.filed = true;
+                n.isMemo = false;
+                n.spiked = false;
+                
+                // Find next note
+                const next = notes.find(x => !x.filed && !x.isMemo && !x.spiked);
+                activeId = next ? next.id : null;
+                if (!activeId) createNewNote();
+                
+                save();
+                
+                // Reset Button
+                btn.innerText = "File Story";
+                btn.style.background = "";
+                fileUndoTimer = null;
+            }
+        }, 10000); // 10 Seconds
     }
     
     // FILE MEMOS
@@ -1597,7 +1608,6 @@
 
         renderAgenda(); 
     }
-    function fileAndEmail() { const n = notes.find(x => x.id === activeId); if(!n) return; const btn = document.getElementById('email-btn'); btn.innerText = "Sending..."; document.getElementById('hidden-title').value = n.title; document.getElementById('hidden-message').value = document.getElementById('story-editor').innerText; document.getElementById('hidden-time').value = new Date().toLocaleString(); emailjs.sendForm('service_i7fjjgg', 'template_591ycw8', document.getElementById('email-bridge-form')).then(() => { btn.innerHTML = 'Sent <svg class="success-tick" viewBox="0 0 52 52"><path d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg>'; setTimeout(() => { fileNote(); btn.innerText = "File & Email"; }, 1500); }); }
 
     // Run Global Search
     function runGlobalSearch() {
