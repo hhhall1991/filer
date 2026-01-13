@@ -7,36 +7,48 @@
     
     <style>
         :root {
-            --beige-bg: #f5f5dc;
-            --paper: #fdfdf8;
-            --accent: #d2b48c;
-            --amber: #ffbf00;
-            --text: #4a4a4a;
-            --tab-inactive: #e9e9d0;
+            /* BLUE THEME (Backgrounds/UI) */
+            --beige-bg: #f0f8ff; /* Alice Blue */
+            --paper: #ffffff;
+            --accent: #0288d1; /* Strong Ocean Blue */
+            --amber: #ffa000;
+            --text: #37474f; /* Blue-Grey Text */
+            --tab-inactive: #eceff1;
+            
+            /* RESTORED ORIGINAL CALENDAR COLORS */
             --work-green: #c8e6c9;
             --work-text: #2e7d32;
             --off-red: #ffcccb;
             --off-text: #b71c1c;
-            --post-it: #fff9c4;
-            --sky-blue: #add8e6;
-            --purple-memo: #9c27b0;
-            --spike-color: #5d4037; /* Dark Brown/Grey for Spike Tag */
+
+            --post-it: #fffde7;
+            --sky-blue: #b3e5fc;
+            --purple-memo: #7e57c2;
+            --spike-color: #546e7a;
             --border-muted: rgba(0,0,0,0.08);
             --transition: all 0.2s ease-in-out;
-            --icon-btn-color: #4a4a4a;
+            --icon-btn-color: #455a64;
         }
 
         body.dark-mode {
-            --beige-bg: #121212;
-            --paper: #1e1e1e;
-            --text: #e0e0e0;
-            --tab-inactive: #2d2d2d;
-            --post-it: #444433;
-            --accent: #a68b6a;
-            --purple-memo: #ce93d8;
-            --spike-color: #a1887f;
+            /* COOL NAVY DARK MODE */
+            --beige-bg: #102027;
+            --paper: #263238;
+            --text: #eceff1;
+            --tab-inactive: #37474f;
+            --post-it: #37474f;
+            --accent: #4fc3f7; 
+            
+            /* Dark Mode Adjustments for Red/Green */
+            --work-green: #1b5e20;
+            --work-text: #a5d6a7;
+            --off-red: #b71c1c;
+            --off-text: #ffcdd2;
+
+            --purple-memo: #b39ddb;
+            --spike-color: #90a4ae;
             --border-muted: rgba(255,255,255,0.1);
-            --icon-btn-color: #e0e0e0;
+            --icon-btn-color: #cfd8dc;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -82,10 +94,17 @@
 
         .clock-wrapper { display: flex; align-items: center; gap: 15px; flex-shrink: 0; padding-bottom: 4px; cursor: pointer; user-select: none; }
         
-        /* Digital Clock */
+        /* Digital Clock - UPDATED FONT */
         #clock-digital { display: none; align-items: baseline; line-height: 1; }
-        #clock-hm { font-size: 2.8rem; font-weight: 200; color: #222; letter-spacing: -1px; transition: color 0.4s ease; }
-        #clock-s { font-size: 1.1rem; font-weight: 300; color: #888; margin-left: 6px; opacity: 0.8; }
+        #clock-hm { 
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* Cleaner Sans Serif */
+            font-size: 2.8rem; 
+            font-weight: 400; /* Slightly bolder than before */
+            color: #222; 
+            letter-spacing: -0.5px; 
+            transition: color 0.4s ease; 
+        }
+        #clock-s { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 1.1rem; font-weight: 400; color: #888; margin-left: 6px; opacity: 0.8; }
         body.dark-mode #clock-hm { color: #fff; }
         body.dark-mode #clock-s { color: #aaa; }
 
@@ -135,9 +154,6 @@
         #right-drawer.open { right: 0; }
         #outlook-drawer { right: -360px; }
         #outlook-drawer.open { right: 0; }
-
-        /* Hide Old Side Tabs */
-        #wires-tab, #audio-tab, #right-drawer-tab, #outlook-tab { display: none; }
 
         /* Content Styles */
         #side-feed-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-grow: 1; overflow: hidden; }
@@ -227,8 +243,8 @@
 
         /* --- FIXED STORY EDITOR SCROLL --- */
         #story-editor { 
-            flex-grow: 1;           
-            height: auto;           
+            flex-grow: 1;            
+            height: auto;            
             min-height: 0;          
             overflow-y: auto;       
             font-size: 1.2rem; 
@@ -372,21 +388,21 @@
         
         .editor-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--border-muted); margin-top: auto; flex-shrink: 0; }
         
-        .file-btn, .memo-btn, .delete-story-btn, .zen-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
+        .file-btn, .memo-btn, .delete-story-btn, .focus-btn { border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: var(--transition); display: inline-flex; align-items: center; font-size: 0.75rem; }
         .file-btn { background: var(--accent); color: white; }
         .memo-btn { background: var(--purple-memo); color: white; }
         .delete-story-btn { background: transparent; color: var(--off-text); border: 1px solid var(--off-text); }
         @media (hover: hover) { .delete-story-btn:hover { background: var(--off-red); } }
-        .zen-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-        @media (hover: hover) { .zen-btn:hover { background: var(--accent); color: white; } }
+        .focus-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+        @media (hover: hover) { .focus-btn:hover { background: var(--accent); color: white; } }
 
         /* ANIMATED TICK */
         .success-tick { width: 18px; height: 18px; margin-left: 8px; vertical-align: middle; }
         .success-tick path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: draw-tick 0.5s ease-out forwards; }
         @keyframes draw-tick { to { stroke-dashoffset: 0; } }
 
-        /* ZEN MODE UPDATES */
-        body.zen-mode header {
+        /* FOCUS MODE */
+        body.focus-mode header {
             display: flex; /* Keep it visible */
             position: fixed;
             top: 0;
@@ -401,27 +417,27 @@
         }
 
         /* Hide everything in header EXCEPT clock */
-        body.zen-mode .desktop-controls,
-        body.zen-mode .mobile-controls-left,
-        body.zen-mode .mobile-controls-right,
-        body.zen-mode .ticker-wrap {
+        body.focus-mode .desktop-controls,
+        body.focus-mode .mobile-controls-left,
+        body.focus-mode .mobile-controls-right,
+        body.focus-mode .ticker-wrap {
             display: none !important;
         }
 
-        body.zen-mode .clock-wrapper {
+        body.focus-mode .clock-wrapper {
             pointer-events: auto; /* Re-enable clicks for clock */
         }
         
-        body.zen-mode #wires-drawer, body.zen-mode #audio-drawer, body.zen-mode #right-drawer, body.zen-mode #outlook-drawer { display: none; }
-        body.zen-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
-        body.zen-mode .card:last-child { display: none; }
-        body.zen-mode .card:first-child { box-shadow: none; background: transparent; border: none; padding: 40px 0; }
-        body.zen-mode #story-editor { font-size: 1.4rem; line-height: 1.8; }
-        body.zen-mode #catchline-input { font-size: 2.2rem; text-align: center; border-bottom: none; margin-bottom: 30px; }
-        body.zen-mode .editor-footer { border-top: none; opacity: 0.3; transition: opacity 0.3s; }
-        body.zen-mode .editor-footer:hover { opacity: 1; }
-        #exit-zen-btn { position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.1); border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text); z-index: 2000; display: none; }
-        body.zen-mode #exit-zen-btn { display: block; }
+        body.focus-mode #wires-drawer, body.focus-mode #audio-drawer, body.focus-mode #right-drawer, body.focus-mode #outlook-drawer { display: none; }
+        body.focus-mode main { grid-template-columns: 1fr; padding: 40px calc(50% - 400px); height: 100vh; }
+        body.focus-mode .card:last-child { display: none; }
+        body.focus-mode .card:first-child { box-shadow: none; background: transparent; border: none; padding: 40px 0; }
+        body.focus-mode #story-editor { font-size: 1.4rem; line-height: 1.8; }
+        body.focus-mode #catchline-input { font-size: 2.2rem; text-align: center; border-bottom: none; margin-bottom: 30px; }
+        body.focus-mode .editor-footer { border-top: none; opacity: 0.3; transition: opacity 0.3s; }
+        body.focus-mode .editor-footer:hover { opacity: 1; }
+        #exit-focus-btn { position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.1); border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; color: var(--text); z-index: 2000; display: none; }
+        body.focus-mode #exit-focus-btn { display: block; }
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 350px; }
@@ -431,6 +447,36 @@
         #audioModal { display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .audio-modal-content { background: var(--paper); padding: 25px; border-radius: 12px; width: 320px; text-align: center; }
         .audio-controls { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+
+        /* Month Picker (Inline below agenda) */
+        .month-control-container {
+            margin-bottom: 10px; /* Space between controls and calendar */
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        
+        #month-picker-grid {
+            display: none; /* Hidden by default */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .month-btn { 
+            background: rgba(0,0,0,0.03); 
+            border: none; 
+            padding: 8px 4px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.7rem; 
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        .month-btn:hover { background: var(--accent); color: white; }
+        .picker-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 5px; font-size: 0.8rem; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
@@ -511,7 +557,7 @@
 </head>
 <body>
 
-<button id="exit-zen-btn" onclick="toggleZenMode()">Exit Zen Mode (Esc)</button>
+<button id="exit-focus-btn" onclick="toggleFocusMode()">Exit Focus Mode (Esc)</button>
 
 <div id="wires-drawer" class="drawer-panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -650,7 +696,7 @@
             <div id="story-editor" class="rich-editor" contenteditable="true" data-placeholder="Start typing..."></div>
             <div class="editor-footer">
                 <div style="display:flex; gap:15px; align-items:center;">
-                    <button class="zen-btn" onclick="toggleZenMode()">Zen Mode</button>
+                    <button class="focus-btn" onclick="toggleFocusMode()">Focus Mode</button>
                     
                     <div class="format-toolbar" style="margin-bottom:0; border-right:1px solid #ddd; padding-right:10px;">
                         <button class="fmt-btn" onmousedown="event.preventDefault(); formatText('bold');" title="Bold"><b>B</b></button>
@@ -693,13 +739,29 @@
                 <div id="greeting" style="font-size:0.75rem; opacity:0.6; margin:0 0 12px 0;">Welcome</div>
                 
                 <div class="section-label">TRACKER <button onclick="openEventModal()" style="color:var(--accent); background:none; border:none; cursor:pointer;">+</button></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <button onclick="changeWeek(-1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❮</button>
-                    <div id="month-display" style="font-size:0.7rem; font-weight:800;">Month</div>
-                    <button onclick="changeWeek(1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❯</button>
+                
+                <div class="month-control-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; position:relative;">
+                        <button onclick="changeWeek(-1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❮</button>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div id="month-display" onclick="toggleMonthPicker()" style="font-size:0.7rem; font-weight:800; cursor:pointer; padding:2px 8px; border-radius:4px; transition:0.2s; border:1px solid transparent;">Month</div>
+                            <button onclick="resetToToday()" style="border:none; background:rgba(0,0,0,0.05); padding:2px 8px; border-radius:10px; cursor:pointer; color:var(--text); font-size:0.65rem;" title="Go to Today">⟳ Today</button>
+                        </div>
+                        <button onclick="changeWeek(1)" style="border:none; background:none; cursor:pointer; color:var(--text);">❯</button>
+                    </div>
+                    
+                    <div id="month-picker-grid">
+                        <div class="picker-header" style="grid-column: span 4; display:flex; justify-content:center; gap:20px; padding-bottom:5px; margin-bottom:5px; border-bottom:1px dashed var(--border-muted);">
+                            <button onclick="changePickerYear(-1)" style="border:none; background:none; cursor:pointer;">❮</button>
+                            <span id="picker-year">2026</span>
+                            <button onclick="changePickerYear(1)" style="border:none; background:none; cursor:pointer;">❯</button>
+                        </div>
+                        </div>
                 </div>
+
                 <div id="week-calendar" style="display:flex; justify-content:space-between; margin-bottom:10px;"></div>
                 <div id="agenda-list"></div>
+
             </div>
 
             <div class="sidebar-section">
@@ -798,6 +860,77 @@
     const offset = todayObj.getDay() === 0 ? 6 : todayObj.getDay() - 1;
     currentWeekStart.setDate(todayObj.getDate() - offset); currentWeekStart.setHours(0,0,0,0);
     let selectedDate = new Date(); selectedDate.setHours(0,0,0,0);
+
+    // PICKER LOGIC (New Feature)
+    let pickerYear = currentWeekStart.getFullYear();
+
+    function toggleMonthPicker() {
+        const p = document.getElementById('month-picker-grid');
+        const display = document.getElementById('month-display');
+        
+        if(p.style.display === 'grid') {
+            p.style.display = 'none';
+            display.style.border = '1px solid transparent';
+        } else {
+            p.style.display = 'grid';
+            display.style.border = '1px solid var(--accent)';
+            pickerYear = currentWeekStart.getFullYear();
+            renderMonthPicker();
+        }
+    }
+
+    function changePickerYear(dir) {
+        pickerYear += dir;
+        renderMonthPicker();
+    }
+    
+    function resetToToday() {
+        selectedDate = new Date();
+        selectedDate.setHours(0,0,0,0);
+        
+        const now = new Date();
+        const off = now.getDay() === 0 ? 6 : now.getDay() - 1;
+        currentWeekStart = new Date(now);
+        currentWeekStart.setDate(now.getDate() - off);
+        currentWeekStart.setHours(0,0,0,0);
+        
+        renderWeek();
+        document.getElementById('month-picker-grid').style.display = 'none';
+        document.getElementById('month-display').style.border = '1px solid transparent';
+    }
+
+    function renderMonthPicker() {
+        document.getElementById('picker-year').innerText = pickerYear;
+        const grid = document.getElementById('month-picker-grid');
+        // Keep header
+        const header = grid.firstElementChild;
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        
+        // Clear old buttons but keep header
+        grid.innerHTML = '';
+        grid.appendChild(header);
+        
+        months.forEach((m, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'month-btn';
+            btn.onclick = () => selectMonth(i);
+            btn.innerText = m;
+            grid.appendChild(btn);
+        });
+    }
+
+    function selectMonth(monthIndex) {
+        const d = new Date(pickerYear, monthIndex, 1);
+        // Find Monday of that week
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        currentWeekStart = new Date(d.setDate(diff));
+        currentWeekStart.setHours(0,0,0,0);
+        
+        renderWeek();
+        document.getElementById('month-picker-grid').style.display = 'none';
+        document.getElementById('month-display').style.border = '1px solid transparent';
+    }
 
     // FORMATTING FUNCTION
     function formatText(command) {
@@ -1514,17 +1647,17 @@
         renderNonUrgent();
     }
     
-    // ZEN MODE
-    function toggleZenMode() {
-        document.body.classList.toggle('zen-mode');
+    // FOCUS MODE (formerly Zen Mode)
+    function toggleFocusMode() {
+        document.body.classList.toggle('focus-mode');
         document.getElementById('wires-drawer').classList.remove('open');
         document.getElementById('audio-drawer').classList.remove('open');
         document.getElementById('right-drawer').classList.remove('open');
         document.getElementById('outlook-drawer').classList.remove('open');
     }
     document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape" && document.body.classList.contains('zen-mode')) {
-            toggleZenMode();
+        if (event.key === "Escape" && document.body.classList.contains('focus-mode')) {
+            toggleFocusMode();
         }
     });
 
